@@ -1,0 +1,139 @@
+﻿F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\BodyMusics\7저스트룩앳미_100_OLD.mp3
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\BodyMusics\7저스트룩앳미_110_OLD.mp3
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\BodyMusics\7저스트룩앳미_90_OLD.mp3
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\BodyMusics\ShortLoop_210630\5핸즈업하이LoopA2.mp3
+Assets\ButtonInstance.cs
+Assets\DanceAudio.cs
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\DanceMusic\2단계_bpm100\1윈드메이커_100.mp3
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\DanceMusic\2단계_bpm100\2플라이위드미_100.mp3
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\DanceMusic\2단계_bpm100\3레디앤고_100.mp3
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\DanceMusic\2단계_bpm100\4웨이브댄스_100.mp3
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\DanceMusic\2단계_bpm100\5핸즈업하이_100.mp3
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\DanceMusic\2단계_bpm100\6어드벤처밴드_100.mp3
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\DanceMusic\2단계_bpm100\7저스트룩앳미_100.mp3
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\DanceMusic\2단계_bpm110\1윈드메이커_110.mp3
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\DanceMusic\2단계_bpm110\2플라이위드미_110.mp3
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\DanceMusic\2단계_bpm110\3레디앤고_110.mp3
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\DanceMusic\2단계_bpm110\4웨이브댄스_110.mp3
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\DanceMusic\2단계_bpm110\5핸즈업하이_110.mp3
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\DanceMusic\2단계_bpm110\6어드벤처밴드_110.mp3
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\DanceMusic\2단계_bpm110\7저스트룩앳미_110.mp3
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\DanceMusic\2단계_bpm90\1윈드메이커_90.mp3
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\DanceMusic\2단계_bpm90\2플라이위드미_90.mp3
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\DanceMusic\2단계_bpm90\3레디앤고_90.mp3
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\DanceMusic\2단계_bpm90\4웨이브댄스_90.mp3
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\DanceMusic\2단계_bpm90\5핸즈업하이_90.mp3
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\DanceMusic\2단계_bpm90\6어드벤처밴드_90.mp3
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\DanceMusic\2단계_bpm90\7저스트룩앳미_90.mp3
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\DanceMusic\3단계\7저스트룩앳미_100_OLD.mp3
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\DanceVideo\완료 스티커.png
+Assets\EnvMove.cs
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\bg effect.png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\Body_CountBG.png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\Body_MusicSelectBlueSlot.png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\Body_OLD.png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\Body_SE_BG.png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\Body_SE_main.png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\Body_SelectPopUp.png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\Body_Target_old.png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\Body_Wave.png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\BodyEffect\blue color\0.png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\BodyEffect\blue color\1.png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\BodyEffect\blue color\10.png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\BodyEffect\blue color\11.png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\BodyEffect\blue color\12.png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\BodyEffect\blue color\13.png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\BodyEffect\blue color\14.png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\BodyEffect\blue color\15.png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\BodyEffect\blue color\16.png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\BodyEffect\blue color\17.png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\BodyEffect\blue color\18.png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\BodyEffect\blue color\19.png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\BodyEffect\blue color\2.png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\BodyEffect\blue color\20.png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\BodyEffect\blue color\3.png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\BodyEffect\blue color\4.png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\BodyEffect\blue color\5.png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\BodyEffect\blue color\6.png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\BodyEffect\blue color\7.png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\BodyEffect\blue color\9.png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\BodyEffect\EF2.png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\BodyEffect\orange color\1.png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\BodyEffect\orange color\10.png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\BodyEffect\orange color\11.png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\BodyEffect\orange color\12.png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\BodyEffect\orange color\13.png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\BodyEffect\orange color\14.png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\BodyEffect\orange color\15.png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\BodyEffect\orange color\16.png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\BodyEffect\orange color\17.png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\BodyEffect\orange color\18.png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\BodyEffect\orange color\19.png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\BodyEffect\orange color\2.png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\BodyEffect\orange color\20.png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\BodyEffect\orange color\3.png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\BodyEffect\orange color\4.png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\BodyEffect\orange color\5.png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\BodyEffect\orange color\6.png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\BodyEffect\orange color\7.png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\BodyEffect\orange color\8.png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\BodyEffect\orange color\9.png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\BodyVideo.png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\Button.png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\change-camera.png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\Dance_OLD.png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\Dance_Video.png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\Dance_조명2.png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\Dance\Dance_LV2_PowerLeft.png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\Dance\Dance_LV2_SoftLeft.png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\Dance\DanceStarEnd.png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\disableBox.png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\gloom.png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\IconBox.png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\ribbon.png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\Scenes\02 - 복사본.png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\SoundIcons\Body0824\1\E_Thunder1(ST).png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\SoundIcons\Body0824\1\M_Cymbal1(ST).png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\SoundIcons\Body0824\1\M_Gong1(ST).png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\SoundIcons\Body0824\1\timp.png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\SoundIcons\Body0824\2\E_Doorbell1(ST).png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\SoundIcons\Body0824\2\E_TrainHorn1(ST).png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\SoundIcons\Body0824\2\M_Rainstick1(ST).png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\SoundIcons\Body0824\3\Blue_Rainstick.png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\SoundIcons\Body0824\3\E_Doorbell1(ST).png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\SoundIcons\Body0824\3\M_BassDrum1.png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\SoundIcons\Body0824\3\M_Chime1(ST).png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\SoundIcons\Body0824\3\M_Cymbal1(ST).png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\SoundIcons\Body0824\3\M_Rainstick1(ST)_.png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\SoundIcons\Body0824\3\M_SnareRoll2(ST).png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\SoundIcons\Body0824\3\orange_chime.png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\SoundIcons\Body0824\4\E_BirdWhistle01(ST).png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\SoundIcons\Body0824\4\E_Doorbell1(ST)_.png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\SoundIcons\Body0824\4\E_TrainHorn1(ST).png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\SoundIcons\Body0824\5\E_BirdWhistle01(ST).png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\SoundIcons\Body0824\5\E_BirdWhistle01(ST)_Yel.png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\SoundIcons\Body0824\5\M_Chime1(ST).png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\SoundIcons\Body0824\5\M_Gong1(ST).png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\SoundIcons\Body0824\6\E_BirdWhistle01(ST)_.png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\SoundIcons\Body0824\6\E_CarHonk1(ST).png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\SoundIcons\Body0824\6\E2_TruckHonk(e).png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\SoundIcons\Body0824\6\M_Chime1(ST)_.png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\SoundIcons\Body1117\M_Crystal1(ST).png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\SoundIcons\Body1117\M_ShakerRoll1(ST) 1.png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\SoundIcons\M_Chime1(ST).png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\textbox.png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\VoiceOff.png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\VoiceOn.png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\댄스 트레이닝 기본 PNG\연주 소프트 2_OLD.png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\댄스 트레이닝 테두리 PNG\연주 소프트 1_OLD.png
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Images\안내 화면.png
+Assets\Plugins\Android\aspectjrt-1.8.2.jar
+Assets\Plugins\Android\screenrecorderlib-release_1mbs_2.aar
+Assets\Scene\Record.unity
+Assets\Scripts\NativePluginManager.cs
+Assets\Scripts\NativeScreenRecorderAndMuxer.cs
+Assets\Scripts\UnityInternalAudioRecorder.cs
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Shader\바디 트레이닝 소개 영상.mp4
+Assets\StreamingAssets\isoparser-default.properties
+F:\PROJECT\Unity_Projects\MBody_Revised_Clean\Assets\Test1_Body_Align_Pre_21-12-06 12-46-27.mp4
+Assets\TimeCheck.cs
