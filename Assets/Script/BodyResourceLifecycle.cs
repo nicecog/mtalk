@@ -14,31 +14,28 @@ public static class BodyResourceLifecycle
     public static void EnsureBodyCapture()
     {
         ResolveCaptureRefs();
-        ActivateWebcamUi();
+        PrepareWebcamUi();
         MBodyDiagLog.Step("BodyCapture", "EnsureBodyCapture webcam enabled");
     }
 
     public static IEnumerator EnsureBodyCaptureWhenReady()
     {
         ResolveCaptureRefs();
-        ActivateWebcamUi();
+        PrepareWebcamUi();
 
         for (int i = 0; i < 180; i++) {
-            if (cachedWebCam != null) {
-                var tex = cachedWebCam.inputImageTexture;
-                if (tex != null && tex.width > 16 && tex.height > 16)
-                    break;
-            }
+            if (cachedWebCam != null && cachedWebCam.HasValidFrame)
+                break;
             yield return null;
         }
 
-        var readyTex = cachedWebCam != null ? cachedWebCam.inputImageTexture : null;
-        if (readyTex != null && readyTex.width > 16 && readyTex.height > 16) {
-            if (cachedPose != null)
-                cachedPose.enabled = true;
-            MBodyDiagLog.Step("BodyCapture", $"Pose enabled texture={readyTex.width}x{readyTex.height}");
+        if (cachedWebCam != null && cachedWebCam.HasValidFrame) {
+            var readyTex = cachedWebCam.inputImageTexture;
+            MBodyDiagLog.Step("BodyCapture", $"Webcam ready texture={readyTex.width}x{readyTex.height}");
+            ShowWebcamFeed(readyTex);
         } else {
-            MBodyDiagLog.Warn("BodyCapture", "Webcam texture not ready; pose tracking left disabled");
+            MBodyDiagLog.Warn("BodyCapture", "Webcam texture not ready");
+            HideWebcamFeed();
         }
     }
 
@@ -58,11 +55,8 @@ public static class BodyResourceLifecycle
         }
     }
 
-    static void ActivateWebcamUi()
+    static void PrepareWebcamUi()
     {
-        if (cachedInputImage != null)
-            cachedInputImage.SetActive(true);
-
         if (cachedWebCam != null) {
             cachedWebCam.gameObject.SetActive(true);
             cachedWebCam.EnsureCapture();
@@ -71,16 +65,37 @@ public static class BodyResourceLifecycle
         var flow = Object.FindFirstObjectByType<FlowManager>();
         if (flow != null && flow.WebCamObject != null) {
             flow.WebCamObject.gameObject.SetActive(true);
-            flow.WebCamObject.enabled = true;
             flow.WebCamObject.raycastTarget = false;
             flow.OriginalScale();
             flow.WebCamObject.uvRect = new Rect(1f, 0, -1f, 1f);
+            flow.WebCamObject.enabled = false;
+            flow.WebCamObject.texture = null;
+        }
+
+        if (cachedInputImage != null)
+            cachedInputImage.SetActive(true);
+
+        if (cachedPose != null)
+            cachedPose.enabled = true;
+    }
+
+    static void ShowWebcamFeed(Texture tex)
+    {
+        var flow = Object.FindFirstObjectByType<FlowManager>();
+        if (flow != null && flow.WebCamObject != null) {
+            flow.WebCamObject.texture = tex;
+            flow.WebCamObject.color = Color.white;
+            flow.WebCamObject.enabled = true;
         }
     }
-    /// <summary>
-    /// Gates pose compute dispatch so it only runs on actual game pages.
-    /// Keeps the webcam + detecter alive to avoid buffer churn on transitions.
-    /// </summary>
+
+    static void HideWebcamFeed()
+    {
+        var flow = Object.FindFirstObjectByType<FlowManager>();
+        if (flow != null && flow.WebCamObject != null)
+            flow.WebCamObject.enabled = false;
+    }
+
     public static void SetPoseProcessing(bool active)
     {
         if (cachedPose == null)
@@ -92,6 +107,8 @@ public static class BodyResourceLifecycle
 
     public static void ReleaseBodyCapture()
     {
+        SetPoseProcessing(false);
+
         if (cachedWebCam == null)
             cachedWebCam = Object.FindFirstObjectByType<WebCamInput>(FindObjectsInactive.Include);
         if (cachedPose == null)
@@ -99,6 +116,8 @@ public static class BodyResourceLifecycle
 
         if (cachedInputImage == null && cachedWebCam != null)
             cachedInputImage = cachedWebCam.gameObject;
+
+        HideWebcamFeed();
 
         if (cachedInputImage != null)
             cachedInputImage.SetActive(false);

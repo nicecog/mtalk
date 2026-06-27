@@ -153,7 +153,6 @@ public class BodyGameScene : MonoBehaviour {
         section_result = 0;
         Array.Clear(hitCooldown, 0, hitCooldown.Length);
         ResolveReferences();
-        EnableInputImage();
         DisableBlockingRaycasts();
         BindHandMarkers();
         if (!isPractice && Alert != null)
@@ -182,6 +181,24 @@ public class BodyGameScene : MonoBehaviour {
 
         if (!isActiveAndEnabled)
             yield break;
+
+#if UNITY_ANDROID && !UNITY_EDITOR
+        yield return null;
+        yield return null;
+        yield return new WaitForEndOfFrame();
+        if (bm != null && bm.playTimes > 0) {
+            for (int i = 0; i < 6; i++)
+                yield return null;
+            yield return new WaitForEndOfFrame();
+        }
+#endif
+
+        EnableInputImage();
+
+        if (isPractice) {
+            MBodyDiagLog.Step("BodyGame", "DeferredStartup enabling pose after webcam settle");
+            BodyResourceLifecycle.SetPoseProcessing(true);
+        }
 
         BindHandMarkers();
         if (fm != null)

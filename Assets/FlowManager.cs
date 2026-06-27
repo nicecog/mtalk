@@ -16,6 +16,16 @@ public class FlowManager : MonoBehaviour {
     {
         "MainGameCali",
     };
+
+    static readonly HashSet<string> WebcamHiddenPages = new HashSet<string>
+    {
+        "MusicSelect",
+        "SoundSelectYellow",
+        "SoundSelectBlue",
+        "Alert",
+        "SpeedSelect",
+        "EndMessage",
+    };
     public int level;
     public GameObject FirstPage;
 
@@ -189,7 +199,10 @@ public class FlowManager : MonoBehaviour {
         SetTrainingRootsActive(ShouldShowTrainingRoots(pageName));
         BringPageToFront(page);
         bool handPage = BodyHandPages.Contains(pageName);
-        BodyResourceLifecycle.SetPoseProcessing(handPage);
+        if (!handPage) {
+            BodyResourceLifecycle.SetPoseProcessing(false);
+            HideWebcamBetweenGames(pageName);
+        }
         if (handPage)
             BringHandMarkersToFront();
         else
@@ -338,5 +351,14 @@ public class FlowManager : MonoBehaviour {
             BodyPage = SceneFlowRegistry.Get("MusicSelect");
         if (DancePage == null)
             DancePage = SceneFlowRegistry.Get("DanceSelect");
+    }
+
+    void HideWebcamBetweenGames(string pageName)
+    {
+        if (!WebcamHiddenPages.Contains(pageName) || WebCamObject == null)
+            return;
+
+        WebCamObject.enabled = false;
+        WebCamObject.texture = null;
     }
 }

@@ -17,19 +17,32 @@ public class WebCamInput : MonoBehaviour
         }
     }
 
+    /// <summary>Snapshot taken after the display blit — safe for BlazePose (no concurrent GPU writes).</summary>
+    public Texture PoseInputTexture {
+        get {
+            if (staticInput != null)
+                return staticInput;
+            if (poseSnapshotRT != null && poseSnapshotRT.width > 16)
+                return poseSnapshotRT;
+            return inputRT;
+        }
+    }
+
+    public bool HasValidFrame =>
+        staticInput != null
+        || (inputRT != null && inputRT.width > 16 && webCamTexture != null && webCamTexture.isPlaying);
+
     public WebCamTexture webCamTexture;
     RenderTexture inputRT;
-
-    bool initStarted;
+    RenderTexture poseSnapshotRT;
+    Coroutine initRoutine;
+    bool blitCompleted;
 
     void Start()
     {
-        StartCoroutine(InitCaptureCoroutine());
+        EnsureCapture();
     }
 
-    /// <summary>
-    /// Re-open the camera after ReleaseCapture (Start only runs once).
-    /// </summary>
     public void EnsureCapture()
     {
         if (staticInput != null)
@@ -38,14 +51,14 @@ public class WebCamInput : MonoBehaviour
         if (webCamTexture != null && webCamTexture.isPlaying && inputRT != null)
             return;
 
-        if (!initStarted)
-            StartCoroutine(InitCaptureCoroutine());
+        if (initRoutine != null)
+            return;
+
+        initRoutine = StartCoroutine(InitCaptureCoroutine());
     }
 
     IEnumerator InitCaptureCoroutine()
     {
-        initStarted = true;
-
         var performance = PerformanceManager.EnsureExists();
         if (!performance.IsReady)
             yield return performance.InitializeAsync();
@@ -56,6 +69,7 @@ public class WebCamInput : MonoBehaviour
 
         if (inputRT == null) {
             inputRT = new RenderTexture((int)webCamResolution.x, (int)webCamResolution.y, 0);
+            inputRT.Create();
         }
 
         if (webCamTexture == null || !webCamTexture.isPlaying) {
@@ -78,6 +92,9 @@ public class WebCamInput : MonoBehaviour
             }
         }
 
+        for (int i = 0; i < 120 && webCamTexture != null && webCamTexture.width <= 16; i++)
+            yield return null;
+
         if (text != null) {
             if (isDebug && webCamTexture != null)
                 text.text = "Width : " + webCamTexture.width + ", Height : " + webCamTexture.height;
@@ -85,7 +102,7 @@ public class WebCamInput : MonoBehaviour
                 text.text = "";
         }
 
-        initStarted = false;
+        initRoutine = null;
     }
 
     public Text text;
@@ -107,10 +124,42 @@ public class WebCamInput : MonoBehaviour
         var offset = new Vector2((1 - aspectGap) / 2, vMirrored ? 1 : 0);
 
         Graphics.Blit(webCamTexture, inputRT, scale, offset);
+        blitCompleted = true;
+    }
+
+    void LateUpdate()
+    {
+        if (!blitCompleted || staticInput != null || inputRT == null || inputRT.width <= 16)
+            return;
+
+        blitCompleted = false;
+        EnsurePoseSnapshot();
+        Graphics.Blit(inputRT, poseSnapshotRT);
+    }
+
+    void EnsurePoseSnapshot()
+    {
+        if (poseSnapshotRT != null
+            && poseSnapshotRT.width == inputRT.width
+            && poseSnapshotRT.height == inputRT.height)
+            return;
+
+        if (poseSnapshotRT != null) {
+            poseSnapshotRT.Release();
+            Destroy(poseSnapshotRT);
+        }
+
+        poseSnapshotRT = new RenderTexture(inputRT.width, inputRT.height, 0, inputRT.format);
+        poseSnapshotRT.Create();
     }
 
     public void ReleaseCapture()
     {
+        if (initRoutine != null) {
+            StopCoroutine(initRoutine);
+            initRoutine = null;
+        }
+
         if (webCamTexture != null) {
             if (webCamTexture.isPlaying)
                 webCamTexture.Stop();
@@ -118,11 +167,19 @@ public class WebCamInput : MonoBehaviour
             webCamTexture = null;
         }
 
+        if (poseSnapshotRT != null) {
+            poseSnapshotRT.Release();
+            Destroy(poseSnapshotRT);
+            poseSnapshotRT = null;
+        }
+
         if (inputRT != null) {
             inputRT.Release();
             Destroy(inputRT);
             inputRT = null;
         }
+
+        blitCompleted = false;
     }
 
     public void deviceChange()
@@ -178,9 +235,6 @@ public class WebCamInput : MonoBehaviour
 
     void OnDestroy()
     {
-        if (webCamTexture != null)
-            Destroy(webCamTexture);
-        if (inputRT != null)
-            Destroy(inputRT);
+        ReleaseCapture();
     }
 }

@@ -16,9 +16,11 @@
 | 모든 씬 "다음" 버튼 전수 점검 | ✅ 정적 49개 전이 + onClick 타깃 메서드 검증 도구 작성 |
 | 오렌지/블루 악기 선택 오작동 (다른 악기가 올라감) | ✅ 클릭한 아이콘 직접 배치로 수정 |
 | 2회차 진입 크래시 (윈드메이커→플라이 위드미, 악기 선택 후) | ✅ 웹캠 재초기화·코루틴 누수·null 가드 수정 |
+| 2회차 크래시 — BlazePose **GPU 버퍼 경합** (실기 logcat 확보) | ✅ Pose 입력 스냅샷 분리 + AsyncGPUReadback + 진입 타이밍 보강 (4-A장) |
+| 악기 선택 후 흰 배경 (잘했어요~연주 구간) | ✅ 웹캠 RawImage를 프레임 준비 후에만 표시, 비게임 페이지 숨김 |
 | GitHub 업로드 | ✅ `nicecog/mtalk` `main` 브랜치에 최초 커밋 푸시 |
 
-> ⚠️ 이번 세션 코드 수정분은 **APK 미빌드/미설치** 상태(빌드 시도 중 사용자 중단). Tab A8 재연결 후 빌드·E2E 재검증 필요.
+> ✅ 4-A장 수정분은 **APK 빌드·Tab A8 설치 완료**. 실기 2회차 E2E 최종 검증만 대기.
 
 ---
 
@@ -114,6 +116,44 @@ MusicSelect →(Play) SoundSelectYellow →(Next) SoundSelectBlue
 
 ---
 
+## 4-A. 2회차 크래시 추가 분석 — BlazePose GPU 경합 (실기 logcat 확보 후)
+
+> Tab A8 재연결 후 `diag.log` + crash 버퍼 확보. 4·5장의 방어 코드만으로는 **여전히 2회차 `MainGameCali` 진입 직후 네이티브 크래시** 발생 확인.
+
+### 실기 로그로 확인한 크래시 패턴
+
+```
+Fatal signal 11 (SIGSEGV), code 1 (SEGV_MAPERR), fault addr 0x8
+tid: Thread-5 (GPU), pid: com.CAU.MBody
+Cause: null pointer dereference
+backtrace: libunity.so (BuildId 9e42b1ef278251cb)
+```
+
+**흐름(2회차):** 1회차 `MainGame` 완료 → `EndMainGame playTimes=1` → `MusicSelect` → 악기 선택(yellow/blue) → `Alert` → `SpeedSelect` → `MainGameCali` → `Webcam ready 640x480` → `enabling pose after webcam settle` → **약 1~2초 후 SIGSEGV, 로그 종료**. C# 예외 없음 = 네이티브 GPU 스레드 크래시.
+
+### 근본 원인 (2건)
+
+1. **GPU 버퍼 동시 접근:** `PoseVisuallizer.ProcessImage()`가 프레임 시작에 `inputRT`를 읽는데, `WebCamInput.Update()`의 `Graphics.Blit(webCamTexture, inputRT)`는 같은 프레임에 같은 RT에 **쓰기**. 2회차 재진입 시 이 read/write 경합이 null deref로 이어짐.
+2. **흰 배경:** 웹캠 `RawImage`가 텍스처가 준비되기 전에 `enabled=true`로 켜져 **기본 흰색**으로 표시. 1회차 이후 레이어가 남아 `MusicSelect`~`MainGameCali` 구간 배경을 덮음.
+
+### 조치 (코드)
+
+| 파일 | 변경 |
+|------|------|
+| `Assets/Script/WebCamInput.cs` | 전면 재작성. `LateUpdate`에서 Blit **완료 후** 별도 `poseSnapshotRT`로 복사 → BlazePose는 `PoseInputTexture`(스냅샷)만 사용해 GPU 동시 쓰기 제거. `HasValidFrame` 프로퍼티 추가. `EnsureCapture` 코루틴 가드 |
+| `Assets/Script/PoseVisuallizer.cs` | `WaitForEndOfFrame` **후** `ProcessImage` 호출. `AsyncGPUReadback`로 비동기 회수(`GetData` 블로킹 제거), 미지원 기기만 폴백. 2회차(`playTimes>0`)는 settle 프레임 확대(10), Android 처리 간격 ≥8 |
+| `Assets/Script/BodyResourceLifecycle.cs` | 웹캠 프레임이 **유효해질 때까지 RawImage 숨김**, 준비 후에만 텍스처 바인딩·표시(`ShowWebcamFeed`/`HideWebcamFeed`). `ReleaseBodyCapture`에서 Pose 정지 선행 |
+| `Assets/FlowManager.cs` | `WebcamHiddenPages`(MusicSelect/SoundSelect/Alert/SpeedSelect/EndMessage) 진입 시 웹캠 UI 숨김(`HideWebcamBetweenGames`) → 흰 배경 제거 |
+| `Assets/BodyGameScene.cs` | 웹캠 준비 완료 **후에만** `EnableInputImage()`. 2회차 추가 프레임 대기 후 Pose 활성 |
+
+### 빌드·설치
+
+- `scripts/build-android.ps1 -Variant release` → **빌드 성공**, `MBody-latest-stable.apk` (37.61 MB)
+- Tab A8(`R9WR611YAAJ`) `adb install -r` → **Success** (OBB 기존 파일 유지)
+- ⏳ **실기 2회차 E2E 재검증 대기** (배경 정상 + 크래시 해소 확인 필요)
+
+---
+
 ## 5. 다음 세션 우선 작업
 
 1. **Tab A8 USB 재연결**(현재 unauthorized) → 기기에서 디버깅 허용
@@ -128,11 +168,12 @@ MusicSelect →(Play) SoundSelectYellow →(Next) SoundSelectBlue
 
 | 항목 | 상태 |
 |------|------|
-| 이번 세션 수정분 APK | ⏳ 미빌드 (사용자 중단) |
-| Tab A8 연결 | ⚠️ unauthorized/offline — 기기 인증 필요 |
-| 2회차 크래시 실기 재현 logcat | ⏳ 기기 연결 후 확보 |
+| 4-A장 GPU 경합 수정 APK | ✅ 빌드·Tab A8 설치 완료 |
+| Tab A8 연결 | ✅ `device` (인증 완료) |
+| 2회차 크래시 실기 재현 logcat | ✅ 확보 — SIGSEGV(libunity GPU) 원인 규명 |
+| 2회차 크래시 실기 최종 검증 | ⏳ 신규 APK로 재현 여부 확인 대기 |
 | 레거시 no-op onClick (`selectMusic` 등) | 💡 장기 정리 대상(현재 무해) |
 
 ---
 
-*작성: 2026-06-27 — 악기 선택 정확도·2회차 크래시 방어 코드 + 씬 버튼 전수 점검 + GitHub(`nicecog/mtalk`) 업로드. APK 빌드·Tab A8 E2E 재검증 대기.*
+*작성: 2026-06-27 — 악기 선택 정확도·2회차 크래시 방어 코드 + 씬 버튼 전수 점검 + GitHub(`nicecog/mtalk`) 업로드. 후속: BlazePose GPU 경합/흰 배경 수정(4-A장) APK 빌드·Tab A8 설치 완료, 실기 2회차 E2E 최종 검증 대기.*
