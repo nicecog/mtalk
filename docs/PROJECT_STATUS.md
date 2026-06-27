@@ -14,6 +14,16 @@
 | [`ANDROID_DEVICE_PROFILING.md`](./ANDROID_DEVICE_PROFILING.md) | Android 설치·logcat·Profiler |
 | [`cleanup-deleted-files.txt`](./cleanup-deleted-files.txt) | 삭제 파일 전체 목록 |
 
+**세션 작업 기록 (최신순):**
+
+| 문서 | 핵심 내용 |
+|------|-----------|
+| [`SESSION_HANDOFF_2026-06-27.md`](./SESSION_HANDOFF_2026-06-27.md) | 악기 선택 정확도·2회차 크래시 방어, 씬 버튼 전수 점검, GitHub(`nicecog/mtalk`) 업로드 |
+| [`SESSION_HANDOFF_2026-06-20.md`](./SESSION_HANDOFF_2026-06-20.md) | Tab A8 빌드/설치, 로그인·Intro 영상, `BodyManager` null 크래시 |
+| [`SESSION_HANDOFF_2026-06-18.md`](./SESSION_HANDOFF_2026-06-18.md) | 이전 세션 기록 |
+
+> **원격 저장소:** `https://github.com/nicecog/mtalk` (`main`)
+
 ---
 
 ## 빠른 참조
