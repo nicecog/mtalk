@@ -1,0 +1,46 @@
+services:
+  postgres:
+    image: postgres:18.4-alpine
+    container_name: mtalk-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${MTALK_DB_USER:-mtalk}
+      POSTGRES_PASSWORD: ${MTALK_DB_PASSWORD:-mtalk1234}
+      POSTGRES_DB: postgres
+    volumes:
+      - mtalk-pg-data:/var/lib/postgresql
+      - ./docker/init-databases.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${MTALK_DB_USER:-mtalk} -d mbench"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  mtalk:
+    build: .
+    container_name: mtalk-server
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      MBENCH_DB_USER: ${MTALK_DB_USER:-mtalk}
+      MBENCH_DB_PASSWORD: ${MTALK_DB_PASSWORD:-mtalk1234}
+      MBODY_DB_USER: ${MTALK_DB_USER:-mtalk}
+      MBODY_DB_PASSWORD: ${MTALK_DB_PASSWORD:-mtalk1234}
+      MBENCH_ADMIN_PASSWORD: ${MBENCH_ADMIN_PASSWORD:-super-admin!@#$}
+      CNT_DB_HOST: ${CNT_DB_HOST:-db.cnt.re.kr}
+      CNT_DB_PORT: ${CNT_DB_PORT:-3306}
+      CNT_DB_NAME: ${CNT_DB_NAME:-dbhuditcnt}
+      CNT_DB_USER: ${CNT_DB_USER:-huditcnt}
+      CNT_DB_PASSWORD: ${CNT_DB_PASSWORD:-}
+      CNT_LEGACY_BASE_URL: ${CNT_LEGACY_BASE_URL:-http://cnt.re.kr}
+    volumes:
+      - mtalk-uploads:/app/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  mtalk-pg-data:
+  mtalk-uploads:

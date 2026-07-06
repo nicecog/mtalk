@@ -1,0 +1,4 @@
+CREATE DATABASE mbench OWNER mtalk;
+CREATE DATABASE mbody_revised OWNER mtalk;
+GRANT ALL PRIVILEGES ON DATABASE mbench TO mtalk;
+GRANT ALL PRIVILEGES ON DATABASE mbody_revised TO mtalk;

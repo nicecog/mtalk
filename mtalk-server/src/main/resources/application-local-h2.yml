@@ -1,0 +1,19 @@
+# 로컬 H2 스모크 테스트 (Docker/MySQL 불필요)
+spring:
+  datasource:
+    mbench:
+      url: jdbc:h2:file:./data/mbench;MODE=MySQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH
+      driver-class-name: org.h2.Driver
+      username: sa
+      password:
+    mbody:
+      url: jdbc:h2:file:./data/mbody;MODE=MySQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH
+      driver-class-name: org.h2.Driver
+      username: sa
+      password:
+  jpa:
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect

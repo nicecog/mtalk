@@ -1,0 +1,7 @@
+# 로컬 Docker PostgreSQL (호스트 PostgreSQL 포트 충돌 회피 → 5434)
+spring:
+  datasource:
+    mbench:
+      url: jdbc:postgresql://localhost:5434/mbench
+    mbody:
+      url: jdbc:postgresql://localhost:5434/mbody_revised

@@ -1,0 +1,35 @@
+# CAFE24 VPS 배포 (hudit.cafe24.com)
+server:
+  port: ${SERVER_PORT:8080}
+
+spring:
+  datasource:
+    mbench:
+      url: jdbc:postgresql://${MBENCH_DB_HOST:localhost}:${MBENCH_DB_PORT:5432}/${MBENCH_DB_NAME:mbench}
+      username: ${MBENCH_DB_USER}
+      password: ${MBENCH_DB_PASSWORD}
+    mbody:
+      url: jdbc:postgresql://${MBODY_DB_HOST:localhost}:${MBODY_DB_PORT:5432}/${MBODY_DB_NAME:mbody_revised}
+      username: ${MBODY_DB_USER}
+      password: ${MBODY_DB_PASSWORD}
+    cnt:
+      url: jdbc:mysql://${CNT_DB_HOST:db.cnt.re.kr}:${CNT_DB_PORT:3306}/${CNT_DB_NAME:dbhuditcnt}?characterEncoding=utf8&useSSL=false&allowPublicKeyRetrieval=true
+      username: ${CNT_DB_USER}
+      password: ${CNT_DB_PASSWORD}
+
+hudit:
+  cnt:
+    legacy-base-url: ${CNT_LEGACY_BASE_URL:http://cnt.re.kr}
+
+mbench:
+  upload-dir: ${MBENCH_UPLOAD_DIR:/app/uploads/mbench}
+  admin-id: ${MBENCH_ADMIN_ID:super-admin}
+  admin-password: ${MBENCH_ADMIN_PASSWORD}
+
+app:
+  upload-dir: ${MBODY_UPLOAD_DIR:/app/uploads/mbody}
+
+logging:
+  level:
+    root: WARN
+    com.mtalk: INFO

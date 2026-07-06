@@ -1,0 +1,9 @@
+target/
+data/
+uploads/
+.idea/
+*.iml
+.DS_Store
+.env
+.env.*
+!.env.example

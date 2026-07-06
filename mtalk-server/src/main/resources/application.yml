@@ -1,0 +1,63 @@
+server:
+  port: ${SERVER_PORT:8080}
+  servlet:
+    session:
+      timeout: 30m
+
+spring:
+  application:
+    name: mtalk-server
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+  flyway:
+    enabled: false
+  jpa:
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  servlet:
+    multipart:
+      max-file-size: 1024MB
+      max-request-size: 1024MB
+
+  datasource:
+    mbench:
+      driver-class-name: org.postgresql.Driver
+      url: jdbc:postgresql://${MBENCH_DB_HOST:localhost}:${MBENCH_DB_PORT:5432}/${MBENCH_DB_NAME:mbench}
+      username: ${MBENCH_DB_USER:mtalk}
+      password: ${MBENCH_DB_PASSWORD:mtalk1234}
+    mbody:
+      driver-class-name: org.postgresql.Driver
+      url: jdbc:postgresql://${MBODY_DB_HOST:localhost}:${MBODY_DB_PORT:5432}/${MBODY_DB_NAME:mbody_revised}
+      username: ${MBODY_DB_USER:mtalk}
+      password: ${MBODY_DB_PASSWORD:mtalk1234}
+    cnt:
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      url: jdbc:mysql://${CNT_DB_HOST:db.cnt.re.kr}:${CNT_DB_PORT:3306}/${CNT_DB_NAME:dbhuditcnt}?characterEncoding=utf8&useSSL=false&allowPublicKeyRetrieval=true
+      username: ${CNT_DB_USER:huditcnt}
+      password: ${CNT_DB_PASSWORD:}
+
+mbench:
+  upload-dir: ${MBENCH_UPLOAD_DIR:./uploads/mbench}
+  admin-id: ${MBENCH_ADMIN_ID:super-admin}
+  admin-password: ${MBENCH_ADMIN_PASSWORD:super-admin!@#$}
+
+app:
+  upload-dir: ${MBODY_UPLOAD_DIR:./uploads/mbody}
+
+hudit:
+  portal:
+    default-login-id: ${HUDIT_PORTAL_LOGIN_ID:hudit}
+    default-password: ${HUDIT_PORTAL_PASSWORD:hudit!}
+  cnt:
+    legacy-base-url: ${CNT_LEGACY_BASE_URL:http://cnt.re.kr}
+    pdf-template-suffix: ${CNT_PDF_TEMPLATE_SUFFIX:pdf4th}
+    pdf-fetch-timeout-ms: ${CNT_PDF_FETCH_TIMEOUT_MS:45000}
+
+logging:
+  level:
+    com.mtalk: INFO
+    org.hibernate.SQL: warn

@@ -1,0 +1,1872 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MTALK 사용자 관리 - HUDIT</title>
+    <link rel="stylesheet" href="/hudit/css/portal.css?v=12">
+</head>
+<body class="hudit-page-mtalk">
+<div class="hudit-shell">
+    <header class="hudit-topbar">
+        <div class="hudit-brand">
+            <a href="/hudit/dashboard" class="hudit-brand" style="text-decoration:none;color:inherit">
+                <div class="hudit-brand-mark">H</div>
+                <span>HUDIT · MTALK</span>
+            </a>
+        </div>
+        <div class="hudit-topbar-actions">
+            <a class="hudit-btn hudit-btn-secondary hudit-btn-sm" href="/hudit/dashboard">대시보드</a>
+            <button class="hudit-btn hudit-btn-secondary hudit-btn-sm" id="logout-btn" type="button">로그아웃</button>
+        </div>
+    </header>
+
+    <main class="hudit-main">
+        <h1 class="hudit-page-title">MTALK 사용자 관리</h1>
+        <p class="hudit-page-subtitle">환자·사용자 계정을 서비스별로 조회하고 안전하게 관리합니다.</p>
+
+        <div id="page-alert"></div>
+
+        <div class="hudit-card">
+            <div class="hudit-card-body">
+                <div class="hudit-tabs" id="service-tabs" role="tablist"></div>
+
+                <div class="hudit-toolbar">
+                    <div class="hudit-toolbar-meta">
+                        <strong id="active-service-name">M-BENCH</strong>
+                        <span class="hudit-badge" id="user-count">0명</span>
+                        <span class="hudit-badge hudit-badge--video hudit-hidden" id="mbody-video-badge" title="서버 저장 영상">영상 0</span>
+                    </div>
+                    <button class="hudit-btn hudit-btn-primary" id="create-user-btn" type="button">+ 사용자 생성</button>
+                </div>
+
+                <div class="hudit-table-wrap mtalk-users-table-wrap" id="users-table-wrap">
+                    <table class="hudit-table mtalk-users-table" id="users-table">
+                        <thead>
+                        <tr id="users-table-head"></tr>
+                        </thead>
+                        <tbody id="users-tbody">
+                        <tr><td colspan="9" class="hudit-empty">불러오는 중...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<div class="hudit-modal-backdrop" id="user-modal">
+    <div class="hudit-modal hudit-modal-wide" role="dialog" aria-modal="true">
+        <div class="hudit-modal-header">
+            <h2 id="modal-title">사용자 생성</h2>
+            <button class="hudit-btn hudit-btn-secondary hudit-btn-sm" id="modal-close" type="button">닫기</button>
+        </div>
+        <div class="hudit-modal-body">
+            <div id="modal-alert"></div>
+            <form id="user-form">
+                <input type="hidden" id="edit-seq" value="">
+                <div class="hudit-form-group">
+                    <label class="hudit-label" for="form-id">아이디</label>
+                    <input class="hudit-input" id="form-id" required>
+                </div>
+                <div class="hudit-form-group" id="password-group">
+                    <label class="hudit-label" for="form-password">비밀번호</label>
+                    <input class="hudit-input" id="form-password" type="password">
+                    <small style="color:var(--hudit-muted);font-size:0.82rem;display:block;margin-top:0.35rem" id="password-hint">비밀번호를 입력하면 변경됩니다. 비워두면 기존 비밀번호를 유지합니다.</small>
+                </div>
+                <div class="hudit-form-group">
+                    <label class="hudit-label" for="form-name">이름</label>
+                    <input class="hudit-input" id="form-name">
+                </div>
+                <div class="hudit-form-group">
+                    <label class="hudit-label" for="form-email">이메일</label>
+                    <input class="hudit-input" id="form-email" type="email">
+                </div>
+                <div class="hudit-form-group">
+                    <label class="hudit-label" for="form-phone">전화</label>
+                    <input class="hudit-input" id="form-phone">
+                </div>
+                <div class="hudit-form-group">
+                    <label class="hudit-label" for="form-level-id">레벨 ID</label>
+                    <input class="hudit-input" id="form-level-id" type="number" min="1">
+                </div>
+                <div class="hudit-form-group">
+                    <label class="hudit-label" for="form-domain">도메인</label>
+                    <input class="hudit-input" id="form-domain">
+                </div>
+
+                <div id="mbody-progress-section" class="hudit-hidden">
+                    <hr style="border:none;border-top:1px solid var(--hudit-border);margin:1.25rem 0">
+                    <h3 style="margin:0 0 0.75rem;font-size:1rem">플레이어 진행도 (Players.csv)</h3>
+                    <p class="hudit-page-subtitle" style="margin-bottom:1rem">로그인 일수·댄스 해제·단계 잠금에 사용되는 서버 저장 값입니다.</p>
+                    <div class="hudit-form-grid-2">
+                        <div class="hudit-form-group">
+                            <label class="hudit-label" for="form-play-times">playTimes (로그인 일수)</label>
+                            <input class="hudit-input" id="form-play-times" type="number" min="1" value="1">
+                        </div>
+                        <div class="hudit-form-group">
+                            <label class="hudit-label" for="form-body-play-times">bodyPlayTimes (바디 훈련)</label>
+                            <input class="hudit-input" id="form-body-play-times" type="number" min="0" value="0">
+                        </div>
+                    </div>
+                    <div class="hudit-form-group" id="dance-star-editor-wrap">
+                        <label class="hudit-label">댄스 스타 / 댄스 킹 클리어</label>
+                        <p class="dance-progress-intro">
+                            Unity 클라이언트와 동일한 코드 값으로 저장됩니다.
+                            <strong>댄스 스타</strong>는 6단계(F=미클리어, T=클리어),
+                            <strong>댄스 킹</strong>은 7곡(F=미클리어, K=킹클리어)입니다.
+                        </p>
+
+                        <div class="dance-progress-block">
+                            <div class="dance-progress-block-head">
+                                <h4>댄스 스타</h4>
+                                <span class="dance-progress-badge">6단계</span>
+                            </div>
+                            <p class="dance-progress-desc">3단계 이상 댄스 게임을 완료하면 해당 단계가 T로 기록됩니다.</p>
+                            <div class="dance-progress-grid" id="dance-star-grid"></div>
+                        </div>
+
+                        <div class="dance-progress-block">
+                            <div class="dance-progress-block-head">
+                                <h4>댄스 킹</h4>
+                                <span class="dance-progress-badge dance-progress-badge--king">7곡</span>
+                            </div>
+                            <p class="dance-progress-desc">댄스 킹 모드에서 곡을 클리어하면 K로 기록됩니다.</p>
+                            <div class="dance-progress-grid" id="dance-king-grid"></div>
+                        </div>
+
+                        <input type="hidden" id="form-dance-star" value="FFFFFF-FFFFFFF">
+                        <div class="dance-star-encoded" id="dance-star-encoded-preview" aria-live="polite"></div>
+                    </div>
+                    <div class="hudit-form-group">
+                        <label class="hudit-label">lastVisitDate (최근 방문일)</label>
+                        <input class="hudit-input" id="form-last-visit" readonly>
+                    </div>
+
+                    <div id="training-results-section" class="hudit-hidden">
+                        <hr style="border:none;border-top:1px solid var(--hudit-border);margin:1.25rem 0">
+                        <h3 style="margin:0 0 0.75rem;font-size:1rem">훈련 이력 (saveData CSV)</h3>
+                        <div class="hudit-table-wrap" style="max-height:220px;overflow:auto">
+                            <table class="hudit-table">
+                                <thead>
+                                <tr>
+                                    <th>일시</th>
+                                    <th>유형</th>
+                                    <th>단계</th>
+                                    <th>점수</th>
+                                    <th>상세</th>
+                                </tr>
+                                </thead>
+                                <tbody id="training-results-body">
+                                <tr><td colspan="5" class="hudit-empty">불러오는 중...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="mface-progress-section" class="hudit-hidden">
+                    <hr style="border:none;border-top:1px solid var(--hudit-border);margin:1.25rem 0">
+                    <h3 style="margin:0 0 0.75rem;font-size:1rem">얼굴 훈련 진행도 (_FaceData.csv)</h3>
+                    <p class="hudit-page-subtitle" style="margin-bottom:1rem">로그인 일수·아이템 해제에 사용되는 서버 저장 값입니다.</p>
+                    <div class="hudit-form-grid-2">
+                        <div class="hudit-form-group">
+                            <label class="hudit-label" for="form-day-count">dayCount (로그인 일수)</label>
+                            <input class="hudit-input" id="form-day-count" type="number" min="1" value="1">
+                        </div>
+                        <div class="hudit-form-group">
+                            <label class="hudit-label">lastVisitDate (최근 방문일)</label>
+                            <input class="hudit-input" id="form-mface-last-visit" readonly>
+                        </div>
+                    </div>
+                    <div class="hudit-form-group">
+                        <label class="hudit-label">itemString (16자, F=미획득 T=획득)</label>
+                        <p class="dance-progress-desc">Stage2 보상 아이템 8종 × 2슬롯. Unity 클라이언트 ItemString과 동일합니다.</p>
+                        <div class="dance-progress-grid" id="mface-item-grid"></div>
+                        <input type="hidden" id="form-item-string" value="FFFFFFFFFFFFFFFF">
+                        <div class="dance-star-encoded" id="mface-item-encoded-preview" aria-live="polite"></div>
+                    </div>
+
+                    <div id="activity-logs-section" class="hudit-hidden">
+                        <hr style="border:none;border-top:1px solid var(--hudit-border);margin:1.25rem 0">
+                        <h3 style="margin:0 0 0.75rem;font-size:1rem">활동 로그 (_FaceData.csv Log)</h3>
+                        <div class="hudit-table-wrap" style="max-height:220px;overflow:auto">
+                            <table class="hudit-table">
+                                <thead>
+                                <tr>
+                                    <th>날짜</th>
+                                    <th>시간</th>
+                                    <th>내용</th>
+                                </tr>
+                                </thead>
+                                <tbody id="activity-logs-body">
+                                <tr><td colspan="3" class="hudit-empty">불러오는 중...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="msocial-progress-section" class="hudit-hidden">
+                    <hr style="border:none;border-top:1px solid var(--hudit-border);margin:1.25rem 0">
+                    <h3 style="margin:0 0 0.75rem;font-size:1rem">소셜 훈련 진행도 (_SocialData.csv)</h3>
+                    <p class="hudit-page-subtitle" style="margin-bottom:1rem">로그인 일수·Progress(32자)에 사용되는 서버 저장 값입니다.</p>
+                    <div class="hudit-form-grid-2">
+                        <div class="hudit-form-group">
+                            <label class="hudit-label" for="form-msocial-day-count">dayCount (로그인 일수)</label>
+                            <input class="hudit-input" id="form-msocial-day-count" type="number" min="1" value="1">
+                        </div>
+                        <div class="hudit-form-group">
+                            <label class="hudit-label">lastVisitDate (최근 방문일)</label>
+                            <input class="hudit-input" id="form-msocial-last-visit" readonly>
+                        </div>
+                    </div>
+                    <div class="hudit-form-group">
+                        <label class="hudit-label">progressString (32자, F=미획득 T=획득)</label>
+                        <p class="dance-progress-desc">Unity 클라이언트 ItemString(Progress 컬럼)과 동일합니다.</p>
+                        <div class="dance-progress-grid" id="msocial-progress-grid"></div>
+                        <input type="hidden" id="form-msocial-progress-string" value="FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF">
+                        <div class="dance-star-encoded" id="msocial-progress-encoded-preview" aria-live="polite"></div>
+                    </div>
+
+                    <div id="msocial-activity-logs-section" class="hudit-hidden">
+                        <hr style="border:none;border-top:1px solid var(--hudit-border);margin:1.25rem 0">
+                        <h3 style="margin:0 0 0.75rem;font-size:1rem">활동 로그 (_SocialData.csv Log)</h3>
+                        <div class="hudit-table-wrap" style="max-height:220px;overflow:auto">
+                            <table class="hudit-table">
+                                <thead>
+                                <tr>
+                                    <th>날짜</th>
+                                    <th>시간</th>
+                                    <th>내용</th>
+                                </tr>
+                                </thead>
+                                <tbody id="msocial-activity-logs-body">
+                                <tr><td colspan="3" class="hudit-empty">불러오는 중...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="hudit-modal-footer">
+            <button class="hudit-btn hudit-btn-secondary" id="modal-cancel" type="button">취소</button>
+            <button class="hudit-btn hudit-btn-primary" id="modal-save" type="button">저장</button>
+        </div>
+    </div>
+</div>
+
+<div class="hudit-modal-backdrop" id="reset-modal">
+    <div class="hudit-modal" role="dialog" aria-modal="true">
+        <div class="hudit-modal-header">
+            <h2>비밀번호 초기화</h2>
+            <button class="hudit-btn hudit-btn-secondary hudit-btn-sm" id="reset-close" type="button">닫기</button>
+        </div>
+        <div class="hudit-modal-body">
+            <p id="reset-message">비밀번호를 초기화하시겠습니까?</p>
+            <div id="reset-form" class="hudit-form-group">
+                <label class="hudit-label" for="reset-password">새 비밀번호</label>
+                <div style="display:flex;gap:0.5rem;align-items:center">
+                    <input class="hudit-input" id="reset-password" type="text" placeholder="비워두면 랜덤 생성" autocomplete="new-password">
+                    <button class="hudit-btn hudit-btn-secondary hudit-btn-sm" id="reset-random" type="button">랜덤 생성</button>
+                </div>
+                <small style="color:var(--hudit-muted);font-size:0.82rem;display:block;margin-top:0.35rem">
+                    직접 입력하거나, 비워둔 채 초기화하면 12자리 랜덤 비밀번호가 생성됩니다.
+                </small>
+            </div>
+            <div id="reset-result" class="hudit-hidden">
+                <div class="hudit-alert hudit-alert-info">
+                    적용된 비밀번호: <strong id="temp-password"></strong>
+                </div>
+                <p style="color:#646970;font-size:0.9rem">사용자에게 안전한 방법으로 전달해 주세요.</p>
+            </div>
+        </div>
+        <div class="hudit-modal-footer">
+            <button class="hudit-btn hudit-btn-secondary" id="reset-cancel" type="button">닫기</button>
+            <button class="hudit-btn hudit-btn-danger" id="reset-confirm" type="button">초기화</button>
+        </div>
+    </div>
+</div>
+
+<script src="/hudit/js/portal.js"></script>
+<script>
+const SERVICES = [
+    { id: "mbench", name: "M-BENCH", color: "#2271b1" },
+    { id: "mbody", name: "M-BODY", color: "#00a32a" },
+    { id: "mface", name: "M-FACE", color: "#9b51e0" },
+    { id: "msocial", name: "M-SOCIAL", color: "#d63638" }
+];
+
+let activeService = "mbench";
+let users = [];
+let resetTargetSeq = null;
+let mbodyVideoSummary = { totalCount: 0, byUser: {}, byType: {} };
+let expandedVideoUserSeq = null;
+let videoPanelCache = {};
+let videoPanelFilters = {};
+let activeVideoSeq = null;
+
+const CONTENT_TYPE_LABELS = {
+    Body_Align: "바디 정렬",
+    BodyThirdPlay: "바디 3단계",
+    Dance_Align: "댄스 정렬",
+    DanceThirdPlay: "댄스 3단계",
+    DanceKing: "댄스 킹",
+    Sample: "샘플"
+};
+
+const DANCE_STAR_LEVELS = [
+    { num: 1, name: "날아봐" },
+    { num: 2, name: "날봐줘" },
+    { num: 3, name: "디스코" },
+    { num: 4, name: "연주" },
+    { num: 5, name: "스웨그" },
+    { num: 6, name: "풍차" }
+];
+
+const DANCE_KING_SONGS = [
+    { num: 1, name: "곡 1" },
+    { num: 2, name: "곡 2" },
+    { num: 3, name: "곡 3" },
+    { num: 4, name: "곡 4" },
+    { num: 5, name: "곡 5" },
+    { num: 6, name: "곡 6" },
+    { num: 7, name: "곡 7" }
+];
+
+const DEFAULT_DANCE_STAR = "FFFFFF-FFFFFFF";
+
+function parseDanceStar(raw) {
+    const value = (raw || DEFAULT_DANCE_STAR).trim().toUpperCase();
+    const star = [];
+    for (let i = 0; i < 6; i++) {
+        star.push(value[i] === "T" ? "T" : "F");
+    }
+    const kingStart = value.length > 6 && value[6] === "-" ? 7 : 6;
+    const king = [];
+    for (let i = 0; i < 7; i++) {
+        king.push(value[kingStart + i] === "K" ? "K" : "F");
+    }
+    return { star, king };
+}
+
+function buildDanceStar(star, king) {
+    const starPart = star.map(char => (char === "T" ? "T" : "F")).join("");
+    const kingPart = king.map(char => (char === "K" ? "K" : "F")).join("");
+    return `${starPart}-${kingPart}`;
+}
+
+function renderDanceProgressOption(name, value, label, checked) {
+    const id = `${name}-${value}`;
+    return `
+        <label class="dance-progress-option" for="${id}">
+            <input type="radio" id="${id}" name="${name}" value="${value}"${checked ? " checked" : ""}>
+            <span>${label}</span>
+        </label>
+    `;
+}
+
+function renderDanceStarEditor() {
+    const starGrid = document.getElementById("dance-star-grid");
+    const kingGrid = document.getElementById("dance-king-grid");
+    if (!starGrid || !kingGrid || starGrid.dataset.ready === "1") {
+        return;
+    }
+
+    starGrid.innerHTML = DANCE_STAR_LEVELS.map((level, index) => `
+        <div class="dance-progress-row">
+            <div class="dance-progress-label">
+                <span class="dance-progress-num">${level.num}</span>
+                <span>${level.name}</span>
+            </div>
+            <div class="dance-progress-options">
+                ${renderDanceProgressOption(`dance-star-${index}`, "F", "미클리어 (F)", true)}
+                ${renderDanceProgressOption(`dance-star-${index}`, "T", "클리어 (T)", false)}
+            </div>
+        </div>
+    `).join("");
+
+    kingGrid.innerHTML = DANCE_KING_SONGS.map((song, index) => `
+        <div class="dance-progress-row">
+            <div class="dance-progress-label">
+                <span class="dance-progress-num">${song.num}</span>
+                <span>${song.name}</span>
+            </div>
+            <div class="dance-progress-options">
+                ${renderDanceProgressOption(`dance-king-${index}`, "F", "미클리어 (F)", true)}
+                ${renderDanceProgressOption(`dance-king-${index}`, "K", "킹클리어 (K)", false)}
+            </div>
+        </div>
+    `).join("");
+
+    const syncPreview = () => {
+        const encoded = readDanceStarFromEditor();
+        const hidden = document.getElementById("form-dance-star");
+        const preview = document.getElementById("dance-star-encoded-preview");
+        if (hidden) {
+            hidden.value = encoded;
+        }
+        if (preview) {
+            const { star, king } = parseDanceStar(encoded);
+            const starCleared = star.filter(char => char === "T").length;
+            const kingCleared = king.filter(char => char === "K").length;
+            preview.textContent = `저장 코드: ${encoded} (스타 ${starCleared}/6 · 킹 ${kingCleared}/7)`;
+        }
+    };
+
+    starGrid.querySelectorAll('input[type="radio"]').forEach(input => {
+        input.addEventListener("change", syncPreview);
+    });
+    kingGrid.querySelectorAll('input[type="radio"]').forEach(input => {
+        input.addEventListener("change", syncPreview);
+    });
+
+    starGrid.dataset.ready = "1";
+    syncPreview();
+}
+
+function setDanceStarEditor(raw) {
+    renderDanceStarEditor();
+    const { star, king } = parseDanceStar(raw);
+    star.forEach((value, index) => {
+        const input = document.querySelector(`input[name="dance-star-${index}"][value="${value}"]`);
+        if (input) {
+            input.checked = true;
+        }
+    });
+    king.forEach((value, index) => {
+        const input = document.querySelector(`input[name="dance-king-${index}"][value="${value}"]`);
+        if (input) {
+            input.checked = true;
+        }
+    });
+    const encoded = buildDanceStar(star, king);
+    const hidden = document.getElementById("form-dance-star");
+    const preview = document.getElementById("dance-star-encoded-preview");
+    if (hidden) {
+        hidden.value = encoded;
+    }
+    if (preview) {
+        const starCleared = star.filter(char => char === "T").length;
+        const kingCleared = king.filter(char => char === "K").length;
+        preview.textContent = `저장 코드: ${encoded} (스타 ${starCleared}/6 · 킹 ${kingCleared}/7)`;
+    }
+}
+
+function readDanceStarFromEditor() {
+    const star = DANCE_STAR_LEVELS.map((_, index) => {
+        const checked = document.querySelector(`input[name="dance-star-${index}"]:checked`);
+        return checked && checked.value === "T" ? "T" : "F";
+    });
+    const king = DANCE_KING_SONGS.map((_, index) => {
+        const checked = document.querySelector(`input[name="dance-king-${index}"]:checked`);
+        return checked && checked.value === "K" ? "K" : "F";
+    });
+    return buildDanceStar(star, king);
+}
+
+function isMbodyService() {
+    return activeService === "mbody";
+}
+
+function isMfaceService() {
+    return activeService === "mface";
+}
+
+function isMsocialService() {
+    return activeService === "msocial";
+}
+
+function isProgressService() {
+    return isMbodyService() || isMfaceService() || isMsocialService();
+}
+
+function tableColspan() {
+    if (isMbodyService()) {
+        return 7;
+    }
+    if (isProgressService()) {
+        return 6;
+    }
+    return 9;
+}
+
+const DEFAULT_ITEM_STRING = "FFFFFFFFFFFFFFFF";
+const DEFAULT_SOCIAL_PROGRESS_STRING = "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF";
+const MFACE_ITEM_LABELS = [
+    "아이템1-A", "아이템1-B", "아이템2-A", "아이템2-B",
+    "아이템3-A", "아이템3-B", "아이템4-A", "아이템4-B",
+    "아이템5-A", "아이템5-B", "아이템6-A", "아이템6-B",
+    "아이템7-A", "아이템7-B", "아이템8-A", "아이템8-B"
+];
+
+function setMbodyUiState() {
+    document.body.classList.toggle("mtalk-service-mbody", isMbodyService());
+    document.body.classList.toggle("mtalk-service-mface", isMfaceService());
+    document.body.classList.toggle("mtalk-service-msocial", isMsocialService());
+    const progressSection = document.getElementById("mbody-progress-section");
+    if (progressSection) {
+        progressSection.classList.toggle("hudit-hidden", !isMbodyService());
+    }
+    const mfaceSection = document.getElementById("mface-progress-section");
+    if (mfaceSection) {
+        mfaceSection.classList.toggle("hudit-hidden", !isMfaceService());
+    }
+    const msocialSection = document.getElementById("msocial-progress-section");
+    if (msocialSection) {
+        msocialSection.classList.toggle("hudit-hidden", !isMsocialService());
+    }
+    const table = document.getElementById("users-table");
+    if (table) {
+        table.classList.toggle("mtalk-users-table--mbody", isMbodyService());
+        table.classList.toggle("mtalk-users-table--mface", isMfaceService());
+        table.classList.toggle("mtalk-users-table--msocial", isMsocialService());
+    }
+    const badge = document.getElementById("mbody-video-badge");
+    if (badge) {
+        const show = isMbodyService();
+        badge.classList.toggle("hudit-hidden", !show);
+        if (show) {
+            badge.textContent = `영상 ${mbodyVideoSummary.totalCount ?? 0}`;
+            if (mbodyVideoSummary.missingFiles > 0) {
+                badge.title = `서버 저장 영상 (파일 누락 ${mbodyVideoSummary.missingFiles}건)`;
+            } else {
+                badge.title = "서버 저장 영상";
+            }
+        }
+    }
+    renderTableHeader();
+}
+
+function getUserVideoCount(userSeq) {
+    return mbodyVideoSummary.byUser?.[userSeq]
+        ?? mbodyVideoSummary.byUser?.[String(userSeq)]
+        ?? 0;
+}
+
+function buildVideoDetailRow(user, isExpanded) {
+    const label = user.name || user.id || "사용자";
+    return `
+        <tr class="video-detail-row ${isExpanded ? "is-open" : "hudit-hidden"}" data-video-detail-for="${user.seq}">
+            <td colspan="${tableColspan()}" class="video-detail-cell">
+                <div class="video-inline-panel" id="video-panel-${user.seq}" data-user-seq="${user.seq}">
+                    <div class="video-inline-header">
+                        <div>
+                            <strong>${escapeHtml(label)}</strong>
+                            <span class="video-inline-meta">${escapeHtml(user.id)} · SEQ ${user.seq}</span>
+                        </div>
+                    </div>
+                    <div id="video-panel-alert-${user.seq}"></div>
+                    <div class="video-inline-stats" id="video-stats-${user.seq}"></div>
+                    <div class="video-inline-toolbar">
+                        <label class="hudit-label video-filter-label" for="video-filter-${user.seq}">유형 필터</label>
+                        <select class="hudit-input video-type-filter" id="video-filter-${user.seq}" data-user-seq="${user.seq}">
+                            <option value="">전체</option>
+                        </select>
+                    </div>
+                    <div class="video-inline-layout">
+                        <div class="video-list-panel">
+                            <div class="hudit-table-wrap video-list-wrap">
+                                <table class="hudit-table video-list-table">
+                                    <thead>
+                                    <tr>
+                                        <th>일시</th>
+                                        <th>유형</th>
+                                        <th>점수</th>
+                                        <th>파일</th>
+                                        <th>크기</th>
+                                        <th>상태</th>
+                                        <th class="col-actions">관리</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody id="video-list-body-${user.seq}">
+                                    <tr><td colspan="7" class="hudit-empty">불러오는 중...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="video-player-panel">
+                            <div class="video-player-shell" id="video-player-shell-${user.seq}">
+                                <div class="video-player-viewport">
+                                    <p class="video-player-placeholder">목록에서 재생을 선택하세요.</p>
+                                    <video id="video-player-${user.seq}" playsinline preload="metadata" class="hudit-hidden"></video>
+                                    <div class="video-player-controls hudit-hidden" id="video-controls-${user.seq}">
+                                        <button type="button" class="video-ctrl-btn" data-video-ctrl="play" aria-label="재생/일시정지" title="재생/일시정지">▶</button>
+                                        <input type="range" class="video-seek" id="video-seek-${user.seq}" min="0" max="0" step="0.05" value="0" aria-label="재생 위치">
+                                        <span class="video-time" id="video-time-${user.seq}">0:00 / 0:00</span>
+                                        <button type="button" class="video-ctrl-btn video-ctrl-btn--text" data-video-ctrl="download" aria-label="다운로드" title="다운로드">↓</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <p class="video-player-meta" id="video-player-meta-${user.seq}"></p>
+                        </div>
+                    </div>
+                </div>
+            </td>
+        </tr>`;
+}
+
+function formatVideoTime(seconds) {
+    const total = Math.max(0, Math.floor(Number(seconds) || 0));
+    const mins = Math.floor(total / 60);
+    const secs = total % 60;
+    return `${mins}:${String(secs).padStart(2, "0")}`;
+}
+
+function updateVideoControlState(userSeq) {
+    const player = document.getElementById(`video-player-${userSeq}`);
+    const playBtn = document.querySelector(`#video-controls-${userSeq} [data-video-ctrl="play"]`);
+    const seek = document.getElementById(`video-seek-${userSeq}`);
+    const timeLabel = document.getElementById(`video-time-${userSeq}`);
+    if (!player || !seek || !timeLabel) {
+        return;
+    }
+
+    const duration = Number.isFinite(player.duration) ? player.duration : 0;
+    const current = Number.isFinite(player.currentTime) ? player.currentTime : 0;
+    if (duration > 0) {
+        seek.max = String(duration);
+        if (!seek.dataset.seeking) {
+            seek.value = String(current);
+        }
+    }
+    timeLabel.textContent = `${formatVideoTime(current)} / ${formatVideoTime(duration)}`;
+    if (playBtn) {
+        playBtn.textContent = player.paused ? "▶" : "⏸";
+        playBtn.setAttribute("aria-label", player.paused ? "재생" : "일시정지");
+    }
+}
+
+function bindVideoPlayerControls(userSeq) {
+    const controls = document.getElementById(`video-controls-${userSeq}`);
+    const player = document.getElementById(`video-player-${userSeq}`);
+    const shell = document.getElementById(`video-player-shell-${userSeq}`);
+    if (!controls || !player || controls.dataset.bound) {
+        return;
+    }
+    controls.dataset.bound = "1";
+
+    const playBtn = controls.querySelector('[data-video-ctrl="play"]');
+    const seek = document.getElementById(`video-seek-${userSeq}`);
+
+    const pinControls = () => shell?.classList.add("controls-open");
+    const unpinControls = () => shell?.classList.remove("controls-open");
+
+    playBtn?.addEventListener("click", () => {
+        if (player.paused) {
+            player.play().catch(() => {});
+        } else {
+            player.pause();
+        }
+    });
+
+    controls.querySelector('[data-video-ctrl="download"]')?.addEventListener("click", () => {
+        if (activeVideoSeq && expandedVideoUserSeq === userSeq) {
+            downloadVideo(activeVideoSeq, userSeq);
+        }
+    });
+
+    seek?.addEventListener("mousedown", pinControls);
+    seek?.addEventListener("touchstart", pinControls, { passive: true });
+    seek?.addEventListener("mouseup", () => setTimeout(unpinControls, 400));
+    seek?.addEventListener("touchend", () => setTimeout(unpinControls, 400));
+    seek?.addEventListener("blur", unpinControls);
+
+    seek?.addEventListener("input", () => {
+        seek.dataset.seeking = "1";
+        const duration = Number.isFinite(player.duration) ? player.duration : 0;
+        const nextTime = Math.min(Math.max(0, Number(seek.value) || 0), duration || 0);
+        const timeLabel = document.getElementById(`video-time-${userSeq}`);
+        if (timeLabel) {
+            timeLabel.textContent = `${formatVideoTime(nextTime)} / ${formatVideoTime(duration)}`;
+        }
+    });
+
+    seek?.addEventListener("change", () => {
+        const duration = Number.isFinite(player.duration) ? player.duration : 0;
+        const nextTime = Math.min(Math.max(0, Number(seek.value) || 0), duration || 0);
+        player.currentTime = nextTime;
+        delete seek.dataset.seeking;
+        updateVideoControlState(userSeq);
+    });
+
+    player.addEventListener("loadedmetadata", () => updateVideoControlState(userSeq));
+    player.addEventListener("timeupdate", () => updateVideoControlState(userSeq));
+    player.addEventListener("play", () => updateVideoControlState(userSeq));
+    player.addEventListener("pause", () => updateVideoControlState(userSeq));
+    player.addEventListener("ended", () => updateVideoControlState(userSeq));
+}
+
+function formatContentType(value) {
+    if (!value) {
+        return "-";
+    }
+    const label = CONTENT_TYPE_LABELS[value] || value;
+    return `<span class="video-type-pill" title="${escapeHtml(value)}">${escapeHtml(label)}</span>`;
+}
+
+function formatFileSize(bytes) {
+    const size = Number(bytes);
+    if (!Number.isFinite(size) || size <= 0) {
+        return "-";
+    }
+    if (size < 1024) {
+        return `${size} B`;
+    }
+    if (size < 1024 * 1024) {
+        return `${(size / 1024).toFixed(1)} KB`;
+    }
+    return `${(size / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function formatVideoStatus(exists) {
+    if (exists) {
+        return `<span class="video-status-pill video-status-pill--ok">정상</span>`;
+    }
+    return `<span class="video-status-pill video-status-pill--missing">누락</span>`;
+}
+
+async function loadMbodyVideoSummary() {
+    if (!isMbodyService()) {
+        return;
+    }
+    try {
+        mbodyVideoSummary = await huditFetch("/mtalk/mbody/videos/summary");
+    } catch (_) {
+        mbodyVideoSummary = { totalCount: 0, byUser: {}, byType: {} };
+    }
+    const badge = document.getElementById("mbody-video-badge");
+    if (badge) {
+        badge.textContent = `영상 ${mbodyVideoSummary.totalCount ?? 0}`;
+    }
+}
+
+function renderTableHeader() {
+    const head = document.getElementById("users-table-head");
+    if (!head) {
+        return;
+    }
+    if (isMbodyService()) {
+        head.innerHTML = `
+            <th class="col-seq">SEQ</th>
+            <th class="col-id">아이디</th>
+            <th class="col-name">이름</th>
+            <th class="col-play">play</th>
+            <th class="col-star">댄스 진행</th>
+            <th class="col-videos">영상</th>
+            <th class="col-actions">관리</th>
+        `;
+        return;
+    }
+    if (isMfaceService()) {
+        head.innerHTML = `
+            <th class="col-seq">SEQ</th>
+            <th class="col-id">아이디</th>
+            <th class="col-name">이름</th>
+            <th class="col-play">day</th>
+            <th class="col-star">아이템</th>
+            <th class="col-actions">관리</th>
+        `;
+        return;
+    }
+    if (isMsocialService()) {
+        head.innerHTML = `
+            <th class="col-seq">SEQ</th>
+            <th class="col-id">아이디</th>
+            <th class="col-name">이름</th>
+            <th class="col-play">day</th>
+            <th class="col-star">Progress</th>
+            <th class="col-actions">관리</th>
+        `;
+        return;
+    }
+    head.innerHTML = `
+        <th>SEQ</th>
+        <th>아이디</th>
+        <th>이름</th>
+        <th>이메일</th>
+        <th>전화</th>
+        <th>레벨</th>
+        <th>도메인</th>
+        <th>등록일</th>
+        <th class="col-actions">관리</th>
+    `;
+}
+
+function formatItemString(value) {
+    if (!value || value.length < 16) {
+        return "-";
+    }
+    const cleared = value.split("").filter(char => char === "T").length;
+    return `<span class="mtalk-star-pill" title="${escapeHtml(value)}">획득 ${cleared}/16</span>`;
+}
+
+function formatSocialProgressString(value) {
+    if (!value || value.length < 32) {
+        return "-";
+    }
+    const cleared = value.split("").filter(char => char === "T").length;
+    return `<span class="mtalk-star-pill" title="${escapeHtml(value)}">획득 ${cleared}/32</span>`;
+}
+
+function renderMfaceItemGrid() {
+    const grid = document.getElementById("mface-item-grid");
+    if (!grid) {
+        return;
+    }
+    grid.innerHTML = MFACE_ITEM_LABELS.map((label, index) => {
+        const id = `mface-item-${index}`;
+        return `
+        <div class="dance-progress-row">
+            <div class="dance-progress-label">
+                <span class="dance-progress-num">${index + 1}</span>
+                <span>${label}</span>
+            </div>
+            <div class="dance-progress-options">
+                <label class="dance-progress-option" for="${id}-f">
+                    <input type="radio" name="${id}" id="${id}-f" value="F" checked> F
+                </label>
+                <label class="dance-progress-option" for="${id}-t">
+                    <input type="radio" name="${id}" id="${id}-t" value="T"> T
+                </label>
+            </div>
+        </div>`;
+    }).join("");
+    grid.querySelectorAll("input[type=radio]").forEach(input => {
+        input.addEventListener("change", updateMfaceItemPreview);
+    });
+}
+
+function setMfaceItemEditor(value) {
+    const normalized = (value && value.length >= 16 ? value : DEFAULT_ITEM_STRING).substring(0, 16).toUpperCase();
+    document.getElementById("form-item-string").value = normalized;
+    for (let i = 0; i < 16; i++) {
+        const char = normalized.charAt(i);
+        const target = document.getElementById(`mface-item-${i}-${char === "T" ? "t" : "f"}`);
+        if (target) {
+            target.checked = true;
+        }
+    }
+    updateMfaceItemPreview();
+}
+
+function readMfaceItemFromEditor() {
+    return MFACE_ITEM_LABELS.map((_, index) => {
+        const checked = document.querySelector(`input[name="mface-item-${index}"]:checked`);
+        return checked && checked.value === "T" ? "T" : "F";
+    }).join("");
+}
+
+function updateMfaceItemPreview() {
+    const encoded = readMfaceItemFromEditor();
+    document.getElementById("form-item-string").value = encoded;
+    const preview = document.getElementById("mface-item-encoded-preview");
+    if (preview) {
+        preview.textContent = `itemString: ${encoded}`;
+    }
+}
+
+const MSOCIAL_PROGRESS_LABELS = Array.from({ length: 32 }, (_, i) => `슬롯 ${i + 1}`);
+
+function renderMsocialProgressGrid() {
+    const grid = document.getElementById("msocial-progress-grid");
+    if (!grid) {
+        return;
+    }
+    grid.innerHTML = MSOCIAL_PROGRESS_LABELS.map((label, index) => {
+        const id = `msocial-progress-${index}`;
+        return `
+        <div class="dance-progress-row">
+            <div class="dance-progress-label">
+                <span class="dance-progress-num">${index + 1}</span>
+                <span>${label}</span>
+            </div>
+            <div class="dance-progress-options">
+                <label class="dance-progress-option" for="${id}-f">
+                    <input type="radio" name="${id}" id="${id}-f" value="F" checked> F
+                </label>
+                <label class="dance-progress-option" for="${id}-t">
+                    <input type="radio" name="${id}" id="${id}-t" value="T"> T
+                </label>
+            </div>
+        </div>`;
+    }).join("");
+    grid.querySelectorAll("input[type=radio]").forEach(input => {
+        input.addEventListener("change", updateMsocialProgressPreview);
+    });
+}
+
+function setMsocialProgressEditor(value) {
+    const normalized = (value && value.length >= 32 ? value : DEFAULT_SOCIAL_PROGRESS_STRING).substring(0, 32).toUpperCase();
+    document.getElementById("form-msocial-progress-string").value = normalized;
+    for (let i = 0; i < 32; i++) {
+        const char = normalized.charAt(i);
+        const target = document.getElementById(`msocial-progress-${i}-${char === "T" ? "t" : "f"}`);
+        if (target) {
+            target.checked = true;
+        }
+    }
+    updateMsocialProgressPreview();
+}
+
+function readMsocialProgressFromEditor() {
+    return MSOCIAL_PROGRESS_LABELS.map((_, index) => {
+        const checked = document.querySelector(`input[name="msocial-progress-${index}"]:checked`);
+        return checked && checked.value === "T" ? "T" : "F";
+    }).join("");
+}
+
+function updateMsocialProgressPreview() {
+    const encoded = readMsocialProgressFromEditor();
+    document.getElementById("form-msocial-progress-string").value = encoded;
+    const preview = document.getElementById("msocial-progress-encoded-preview");
+    if (preview) {
+        preview.textContent = `progressString: ${encoded}`;
+    }
+}
+
+function formatDanceStar(value) {
+    if (!value) {
+        return "-";
+    }
+    const { star, king } = parseDanceStar(value);
+    const encoded = buildDanceStar(star, king);
+    const starCleared = star.filter(char => char === "T").length;
+    const kingCleared = king.filter(char => char === "K").length;
+    const label = `스타 ${starCleared}/6 · 킹 ${kingCleared}/7`;
+    return `<span class="mtalk-star-pill" title="${escapeHtml(encoded)}">${escapeHtml(label)}</span>`;
+}
+
+function openModal(id) {
+    document.getElementById(id).classList.add("open");
+}
+
+function closeModal(id) {
+    document.getElementById(id).classList.remove("open");
+}
+
+function renderTabs() {
+    const tabs = document.getElementById("service-tabs");
+    tabs.innerHTML = SERVICES.map(service => `
+        <button
+            class="hudit-tab ${service.id === activeService ? "active" : ""}"
+            data-service="${service.id}"
+            type="button"
+            role="tab"
+            aria-selected="${service.id === activeService}">
+            ${service.name}
+        </button>
+    `).join("");
+
+    tabs.querySelectorAll(".hudit-tab").forEach(button => {
+        button.addEventListener("click", async () => {
+            activeService = button.dataset.service;
+            expandedVideoUserSeq = null;
+            videoPanelCache = {};
+            videoPanelFilters = {};
+            activeVideoSeq = null;
+            renderTabs();
+            setMbodyUiState();
+            await loadUsers();
+        });
+    });
+}
+
+function renderUsers() {
+    const tbody = document.getElementById("users-tbody");
+    const service = SERVICES.find(s => s.id === activeService);
+    document.getElementById("active-service-name").textContent = service ? service.name : activeService;
+    document.getElementById("user-count").textContent = `${users.length}명`;
+    const colspan = tableColspan();
+    const scrollAnchor = isMbodyService() && expandedVideoUserSeq
+        ? captureScrollAnchor(expandedVideoUserSeq)
+        : null;
+
+    if (!users.length) {
+        tbody.innerHTML = `<tr><td colspan="${colspan}" class="hudit-empty">등록된 사용자가 없습니다.</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = users.flatMap(user => {
+        if (isMbodyService()) {
+            const videoCount = getUserVideoCount(user.seq);
+            const isExpanded = expandedVideoUserSeq === user.seq;
+            const videoCell = videoCount > 0
+                ? `<button class="video-toggle-btn ${isExpanded ? "is-open" : ""}" data-action="videos" data-seq="${user.seq}" data-id="${escapeHtml(user.id)}" data-name="${escapeHtml(user.name || "")}" type="button" aria-expanded="${isExpanded}">
+                        <span class="video-toggle-icon" aria-hidden="true"></span>
+                        영상 목록
+                        <span class="video-toggle-count">${videoCount}</span>
+                   </button>`
+                : `<span class="video-empty-mark">-</span>`;
+            const userRow = `
+        <tr class="mtalk-user-row ${isExpanded ? "has-video-open" : ""}" data-user-seq="${user.seq}">
+            <td class="col-seq">${user.seq}</td>
+            <td class="col-id"><strong class="mtalk-user-id">${escapeHtml(user.id)}</strong></td>
+            <td class="col-name">${escapeHtml(user.name || "-")}</td>
+            <td class="col-play"><span class="mtalk-play-badge">${user.playTimes ?? "-"}</span></td>
+            <td class="col-star">${formatDanceStar(user.danceStar)}</td>
+            <td class="col-videos">${videoCell}</td>
+            <td class="col-actions">
+                <div class="hudit-table-actions">
+                    <button class="hudit-btn hudit-btn-secondary hudit-btn-xs" data-action="edit" data-seq="${user.seq}" type="button">수정</button>
+                    <button class="hudit-btn hudit-btn-danger hudit-btn-xs" data-action="reset" data-seq="${user.seq}" data-id="${escapeHtml(user.id)}" type="button" title="비밀번호 초기화">PW</button>
+                </div>
+            </td>
+        </tr>`;
+            if (videoCount > 0) {
+                return [userRow, buildVideoDetailRow(user, isExpanded)];
+            }
+            return [userRow];
+        }
+        if (isMfaceService()) {
+            return [`<tr>
+            <td class="col-seq">${user.seq}</td>
+            <td class="col-id"><strong class="mtalk-user-id">${escapeHtml(user.id)}</strong></td>
+            <td class="col-name">${escapeHtml(user.name || "-")}</td>
+            <td class="col-play"><span class="mtalk-play-badge">${user.dayCount ?? "-"}</span></td>
+            <td class="col-star">${formatItemString(user.itemString)}</td>
+            <td class="col-actions">
+                <div class="hudit-table-actions">
+                    <button class="hudit-btn hudit-btn-secondary hudit-btn-xs" data-action="edit" data-seq="${user.seq}" type="button">수정</button>
+                    <button class="hudit-btn hudit-btn-danger hudit-btn-xs" data-action="reset" data-seq="${user.seq}" data-id="${escapeHtml(user.id)}" type="button" title="비밀번호 초기화">PW</button>
+                </div>
+            </td>
+        </tr>`];
+        }
+        if (isMsocialService()) {
+            return [`<tr>
+            <td class="col-seq">${user.seq}</td>
+            <td class="col-id"><strong class="mtalk-user-id">${escapeHtml(user.id)}</strong></td>
+            <td class="col-name">${escapeHtml(user.name || "-")}</td>
+            <td class="col-play"><span class="mtalk-play-badge">${user.dayCount ?? "-"}</span></td>
+            <td class="col-star">${formatSocialProgressString(user.itemString)}</td>
+            <td class="col-actions">
+                <div class="hudit-table-actions">
+                    <button class="hudit-btn hudit-btn-secondary hudit-btn-xs" data-action="edit" data-seq="${user.seq}" type="button">수정</button>
+                    <button class="hudit-btn hudit-btn-danger hudit-btn-xs" data-action="reset" data-seq="${user.seq}" data-id="${escapeHtml(user.id)}" type="button" title="비밀번호 초기화">PW</button>
+                </div>
+            </td>
+        </tr>`];
+        }
+        return [`<tr>
+            <td>${user.seq}</td>
+            <td><strong>${escapeHtml(user.id)}</strong></td>
+            <td>${escapeHtml(user.name || "-")}</td>
+            <td class="mtalk-cell-muted">${escapeHtml(user.email || "-")}</td>
+            <td>${escapeHtml(user.phone || "-")}</td>
+            <td>${user.levelId}</td>
+            <td>${escapeHtml(user.domain || "-")}</td>
+            <td class="mtalk-cell-muted">${formatDate(user.createdAt)}</td>
+            <td class="col-actions">
+                <div class="hudit-table-actions">
+                    <button class="hudit-btn hudit-btn-secondary hudit-btn-xs" data-action="edit" data-seq="${user.seq}" type="button">수정</button>
+                    <button class="hudit-btn hudit-btn-danger hudit-btn-xs" data-action="reset" data-seq="${user.seq}" data-id="${escapeHtml(user.id)}" type="button" title="비밀번호 초기화">PW</button>
+                </div>
+            </td>
+        </tr>`];
+    }).flat().join("");
+
+    if (isMbodyService() && expandedVideoUserSeq) {
+        bindVideoPanelEvents(expandedVideoUserSeq);
+        bindVideoPlayerControls(expandedVideoUserSeq);
+        if (videoPanelCache[expandedVideoUserSeq]) {
+            renderVideoTypeFilter(expandedVideoUserSeq, videoPanelCache[expandedVideoUserSeq]);
+            renderVideoPanel(expandedVideoUserSeq);
+        } else {
+            loadVideoPanel(expandedVideoUserSeq);
+        }
+    }
+
+    tbody.querySelectorAll("button[data-action]").forEach(button => {
+        button.addEventListener("click", () => {
+            const seq = Number(button.dataset.seq);
+            if (button.dataset.action === "edit") {
+                openEditModal(seq);
+            } else if (button.dataset.action === "videos") {
+                toggleVideoPanel(seq);
+            } else {
+                openResetModal(seq, button.dataset.id);
+            }
+        });
+    });
+
+    if (scrollAnchor) {
+        restoreScrollAnchor(expandedVideoUserSeq, scrollAnchor);
+    }
+}
+
+function captureScrollAnchor(userSeq) {
+    const row = document.querySelector(`tr.mtalk-user-row[data-user-seq="${userSeq}"]`);
+    if (!row) {
+        return null;
+    }
+    return {
+        userSeq,
+        top: row.getBoundingClientRect().top
+    };
+}
+
+function restoreScrollAnchor(userSeq, anchor = null) {
+    const saved = anchor || captureScrollAnchor(userSeq);
+    if (!saved) {
+        return;
+    }
+    requestAnimationFrame(() => {
+        const row = document.querySelector(`tr.mtalk-user-row[data-user-seq="${saved.userSeq}"]`);
+        if (!row) {
+            return;
+        }
+        const delta = row.getBoundingClientRect().top - saved.top;
+        if (Math.abs(delta) > 1) {
+            window.scrollBy(0, delta);
+        }
+    });
+}
+
+function updateVideoPanelVisibility(userSeq, open) {
+    const userRow = document.querySelector(`tr.mtalk-user-row[data-user-seq="${userSeq}"]`);
+    const detailRow = document.querySelector(`tr.video-detail-row[data-video-detail-for="${userSeq}"]`);
+    const toggleBtn = userRow?.querySelector('[data-action="videos"]');
+    if (userRow) {
+        userRow.classList.toggle("has-video-open", open);
+    }
+    if (detailRow) {
+        detailRow.classList.toggle("is-open", open);
+        detailRow.classList.toggle("hudit-hidden", !open);
+    }
+    if (toggleBtn) {
+        toggleBtn.classList.toggle("is-open", open);
+        toggleBtn.setAttribute("aria-expanded", open ? "true" : "false");
+    }
+}
+
+async function loadUsers() {
+    const tbody = document.getElementById("users-tbody");
+    const pageAlert = document.getElementById("page-alert");
+    const colspan = tableColspan();
+    clearAlert(pageAlert);
+    tbody.innerHTML = `<tr><td colspan="${colspan}" class="hudit-empty">불러오는 중...</td></tr>`;
+    setMbodyUiState();
+
+    try {
+        if (isMbodyService()) {
+            const [userRows] = await Promise.all([
+                huditFetch(`/mtalk/${activeService}/users`),
+                loadMbodyVideoSummary()
+            ]);
+            users = userRows;
+        } else {
+            users = await huditFetch(`/mtalk/${activeService}/users`);
+        }
+        renderUsers();
+    } catch (error) {
+        showAlert(pageAlert, error.message);
+        tbody.innerHTML = `<tr><td colspan="${colspan}" class="hudit-empty">사용자 목록을 불러오지 못했습니다.</td></tr>`;
+    }
+}
+
+function resetForm() {
+    document.getElementById("edit-seq").value = "";
+    document.getElementById("form-id").value = "";
+    document.getElementById("form-password").value = "";
+    document.getElementById("form-name").value = "";
+    document.getElementById("form-email").value = "";
+    document.getElementById("form-phone").value = "";
+    document.getElementById("form-level-id").value = "";
+    document.getElementById("form-domain").value = "";
+    document.getElementById("form-play-times").value = "1";
+    document.getElementById("form-body-play-times").value = "0";
+    setDanceStarEditor(DEFAULT_DANCE_STAR);
+    document.getElementById("form-last-visit").value = "";
+    document.getElementById("form-day-count").value = "1";
+    document.getElementById("form-mface-last-visit").value = "";
+    setMfaceItemEditor(DEFAULT_ITEM_STRING);
+    document.getElementById("form-msocial-day-count").value = "1";
+    document.getElementById("form-msocial-last-visit").value = "";
+    setMsocialProgressEditor(DEFAULT_SOCIAL_PROGRESS_STRING);
+    document.getElementById("training-results-section").classList.add("hudit-hidden");
+    document.getElementById("training-results-body").innerHTML = `<tr><td colspan="5" class="hudit-empty">불러오는 중...</td></tr>`;
+    document.getElementById("activity-logs-section").classList.add("hudit-hidden");
+    document.getElementById("activity-logs-body").innerHTML = `<tr><td colspan="3" class="hudit-empty">불러오는 중...</td></tr>`;
+    document.getElementById("msocial-activity-logs-section").classList.add("hudit-hidden");
+    document.getElementById("msocial-activity-logs-body").innerHTML = `<tr><td colspan="3" class="hudit-empty">불러오는 중...</td></tr>`;
+    clearAlert(document.getElementById("modal-alert"));
+}
+
+function fillMbodyProgressFields(user) {
+    document.getElementById("form-play-times").value = user.playTimes ?? 1;
+    document.getElementById("form-body-play-times").value = user.bodyPlayTimes ?? 0;
+    setDanceStarEditor(user.danceStar || DEFAULT_DANCE_STAR);
+    document.getElementById("form-last-visit").value = user.lastVisitDate || "-";
+}
+
+function buildMbodyProgressPayload() {
+    const danceStar = readDanceStarFromEditor();
+    document.getElementById("form-dance-star").value = danceStar;
+    return {
+        playTimes: Number(document.getElementById("form-play-times").value),
+        bodyPlayTimes: Number(document.getElementById("form-body-play-times").value),
+        danceStar
+    };
+}
+
+async function loadTrainingResults(seq) {
+    const section = document.getElementById("training-results-section");
+    const tbody = document.getElementById("training-results-body");
+    if (!section || !tbody) {
+        return;
+    }
+    section.classList.remove("hudit-hidden");
+    tbody.innerHTML = `<tr><td colspan="5" class="hudit-empty">불러오는 중...</td></tr>`;
+    try {
+        const rows = await huditFetch(`/mtalk/mbody/users/${seq}/training-results`);
+        if (!rows.length) {
+            tbody.innerHTML = `<tr><td colspan="5" class="hudit-empty">저장된 훈련 이력이 없습니다.</td></tr>`;
+            return;
+        }
+        tbody.innerHTML = rows.map(row => `
+            <tr>
+                <td>${escapeHtml(row.recordedAt || "-")}</td>
+                <td>${escapeHtml(row.resultType || "-")}</td>
+                <td>${escapeHtml(row.trial || "-")}</td>
+                <td>${escapeHtml(row.point || "-")}</td>
+                <td>${escapeHtml(row.details || "-")}</td>
+            </tr>
+        `).join("");
+    } catch (error) {
+        tbody.innerHTML = `<tr><td colspan="5" class="hudit-empty">훈련 이력을 불러오지 못했습니다.</td></tr>`;
+    }
+}
+
+function fillMfaceProgressFields(user) {
+    document.getElementById("form-day-count").value = user.dayCount ?? 1;
+    setMfaceItemEditor(user.itemString || DEFAULT_ITEM_STRING);
+    document.getElementById("form-mface-last-visit").value = user.lastVisitDate || "-";
+}
+
+function buildMfaceProgressPayload() {
+    const itemString = readMfaceItemFromEditor();
+    document.getElementById("form-item-string").value = itemString;
+    return {
+        dayCount: Number(document.getElementById("form-day-count").value),
+        itemString
+    };
+}
+
+function fillMsocialProgressFields(user) {
+    document.getElementById("form-msocial-day-count").value = user.dayCount ?? 1;
+    setMsocialProgressEditor(user.itemString || DEFAULT_SOCIAL_PROGRESS_STRING);
+    document.getElementById("form-msocial-last-visit").value = user.lastVisitDate || "-";
+}
+
+function buildMsocialProgressPayload() {
+    const itemString = readMsocialProgressFromEditor();
+    document.getElementById("form-msocial-progress-string").value = itemString;
+    return {
+        dayCount: Number(document.getElementById("form-msocial-day-count").value),
+        itemString
+    };
+}
+
+async function loadActivityLogs(seq) {
+    const section = document.getElementById("activity-logs-section");
+    const tbody = document.getElementById("activity-logs-body");
+    if (!section || !tbody) {
+        return;
+    }
+    section.classList.remove("hudit-hidden");
+    tbody.innerHTML = `<tr><td colspan="3" class="hudit-empty">불러오는 중...</td></tr>`;
+    try {
+        const rows = await huditFetch(`/mtalk/mface/users/${seq}/activity-logs`);
+        if (!rows.length) {
+            tbody.innerHTML = `<tr><td colspan="3" class="hudit-empty">저장된 활동 로그가 없습니다.</td></tr>`;
+            return;
+        }
+        tbody.innerHTML = rows.map(row => `
+            <tr>
+                <td>${escapeHtml(row.logDate || "-")}</td>
+                <td>${escapeHtml(row.logTime || "-")}</td>
+                <td>${escapeHtml(row.logBody || "-")}</td>
+            </tr>
+        `).join("");
+    } catch (error) {
+        tbody.innerHTML = `<tr><td colspan="3" class="hudit-empty">활동 로그를 불러오지 못했습니다.</td></tr>`;
+    }
+}
+
+async function loadMsocialActivityLogs(seq) {
+    const section = document.getElementById("msocial-activity-logs-section");
+    const tbody = document.getElementById("msocial-activity-logs-body");
+    if (!section || !tbody) {
+        return;
+    }
+    section.classList.remove("hudit-hidden");
+    tbody.innerHTML = `<tr><td colspan="3" class="hudit-empty">불러오는 중...</td></tr>`;
+    try {
+        const rows = await huditFetch(`/mtalk/msocial/users/${seq}/activity-logs`);
+        if (!rows.length) {
+            tbody.innerHTML = `<tr><td colspan="3" class="hudit-empty">저장된 활동 로그가 없습니다.</td></tr>`;
+            return;
+        }
+        tbody.innerHTML = rows.map(row => `
+            <tr>
+                <td>${escapeHtml(row.logDate || "-")}</td>
+                <td>${escapeHtml(row.logTime || "-")}</td>
+                <td>${escapeHtml(row.logBody || "-")}</td>
+            </tr>
+        `).join("");
+    } catch (error) {
+        tbody.innerHTML = `<tr><td colspan="3" class="hudit-empty">활동 로그를 불러오지 못했습니다.</td></tr>`;
+    }
+}
+
+function openCreateModal() {
+    resetForm();
+    setMbodyUiState();
+    document.getElementById("modal-title").textContent = "사용자 생성";
+    document.getElementById("form-password").required = true;
+    document.getElementById("password-hint").classList.add("hudit-hidden");
+    if (isMbodyService()) {
+        document.getElementById("form-level-id").value = "10";
+        document.getElementById("form-domain").value = "mbody";
+        fillMbodyProgressFields({ playTimes: 1, bodyPlayTimes: 0, danceStar: DEFAULT_DANCE_STAR });
+    }
+    if (isMfaceService()) {
+        document.getElementById("form-level-id").value = "10";
+        document.getElementById("form-domain").value = "mface";
+        fillMfaceProgressFields({ dayCount: 1, itemString: DEFAULT_ITEM_STRING });
+    }
+    if (isMsocialService()) {
+        document.getElementById("form-level-id").value = "10";
+        document.getElementById("form-domain").value = "msocial";
+        fillMsocialProgressFields({ dayCount: 1, itemString: DEFAULT_SOCIAL_PROGRESS_STRING });
+    }
+    openModal("user-modal");
+}
+
+async function openEditModal(seq) {
+    const user = users.find(item => item.seq === seq);
+    if (!user) {
+        return;
+    }
+    resetForm();
+    setMbodyUiState();
+    document.getElementById("modal-title").textContent = "사용자 수정";
+    document.getElementById("edit-seq").value = String(seq);
+    document.getElementById("form-id").value = user.id;
+    document.getElementById("form-name").value = user.name || "";
+    document.getElementById("form-email").value = user.email || "";
+    document.getElementById("form-phone").value = user.phone || "";
+    document.getElementById("form-level-id").value = user.levelId ?? "";
+    document.getElementById("form-domain").value = user.domain || "";
+    document.getElementById("form-password").required = false;
+    document.getElementById("password-hint").classList.remove("hudit-hidden");
+    if (isMbodyService()) {
+        fillMbodyProgressFields(user);
+        await loadTrainingResults(seq);
+    }
+    if (isMfaceService()) {
+        fillMfaceProgressFields(user);
+        await loadActivityLogs(seq);
+    }
+    if (isMsocialService()) {
+        fillMsocialProgressFields(user);
+        await loadMsocialActivityLogs(seq);
+    }
+    openModal("user-modal");
+}
+
+const RESET_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789!@#";
+
+function generateRandomPassword(length = 12) {
+    let value = "";
+    const random = window.crypto && window.crypto.getRandomValues
+        ? window.crypto.getRandomValues(new Uint32Array(length))
+        : null;
+    for (let i = 0; i < length; i++) {
+        const index = random
+            ? random[i] % RESET_CHARS.length
+            : Math.floor(Math.random() * RESET_CHARS.length);
+        value += RESET_CHARS.charAt(index);
+    }
+    return value;
+}
+
+function openResetModal(seq, loginId) {
+    resetTargetSeq = seq;
+    document.getElementById("reset-message").textContent = `"${loginId}" 계정의 비밀번호를 변경합니다.`;
+    document.getElementById("reset-password").value = "";
+    document.getElementById("reset-result").classList.add("hudit-hidden");
+    document.getElementById("reset-form").classList.remove("hudit-hidden");
+    document.getElementById("reset-confirm").classList.remove("hudit-hidden");
+    openModal("reset-modal");
+}
+
+async function saveUser() {
+    const modalAlert = document.getElementById("modal-alert");
+    clearAlert(modalAlert);
+
+    const seq = document.getElementById("edit-seq").value;
+    const payload = {
+        id: document.getElementById("form-id").value.trim(),
+        password: document.getElementById("form-password").value,
+        name: document.getElementById("form-name").value.trim(),
+        email: document.getElementById("form-email").value.trim(),
+        phone: document.getElementById("form-phone").value.trim(),
+        levelId: Number(document.getElementById("form-level-id").value) || undefined,
+        domain: document.getElementById("form-domain").value.trim() || undefined
+    };
+
+    if (isMbodyService()) {
+        const progress = buildMbodyProgressPayload();
+        if (!progress.danceStar || progress.danceStar.length < 6) {
+            showAlert(modalAlert, "danceStar는 6자 이상이어야 합니다.");
+            return;
+        }
+        if (!Number.isFinite(progress.playTimes) || progress.playTimes < 1) {
+            showAlert(modalAlert, "playTimes는 1 이상이어야 합니다.");
+            return;
+        }
+        if (!Number.isFinite(progress.bodyPlayTimes) || progress.bodyPlayTimes < 0) {
+            showAlert(modalAlert, "bodyPlayTimes는 0 이상이어야 합니다.");
+            return;
+        }
+        Object.assign(payload, progress);
+    }
+
+    if (isMfaceService()) {
+        const progress = buildMfaceProgressPayload();
+        if (!progress.itemString || progress.itemString.length !== 16) {
+            showAlert(modalAlert, "itemString은 16자(T/F)여야 합니다.");
+            return;
+        }
+        if (!Number.isFinite(progress.dayCount) || progress.dayCount < 1) {
+            showAlert(modalAlert, "dayCount는 1 이상이어야 합니다.");
+            return;
+        }
+        Object.assign(payload, progress);
+    }
+
+    if (isMsocialService()) {
+        const progress = buildMsocialProgressPayload();
+        if (!progress.itemString || progress.itemString.length !== 32) {
+            showAlert(modalAlert, "progressString은 32자(T/F)여야 합니다.");
+            return;
+        }
+        if (!Number.isFinite(progress.dayCount) || progress.dayCount < 1) {
+            showAlert(modalAlert, "dayCount는 1 이상이어야 합니다.");
+            return;
+        }
+        Object.assign(payload, progress);
+    }
+
+    if (!payload.id) {
+        showAlert(modalAlert, "아이디를 입력해 주세요.");
+        return;
+    }
+
+    try {
+        if (seq) {
+            const updatePayload = { ...payload };
+            if (!updatePayload.password) {
+                delete updatePayload.password;
+            }
+            await huditFetch(`/mtalk/${activeService}/users/${seq}`, {
+                method: "PUT",
+                body: JSON.stringify(updatePayload)
+            });
+        } else {
+            if (!payload.password) {
+                showAlert(modalAlert, "비밀번호를 입력해 주세요.");
+                return;
+            }
+            await huditFetch(`/mtalk/${activeService}/users`, {
+                method: "POST",
+                body: JSON.stringify(payload)
+            });
+        }
+        closeModal("user-modal");
+        await loadUsers();
+        showAlert(document.getElementById("page-alert"), "저장되었습니다.", "success");
+    } catch (error) {
+        showAlert(modalAlert, error.message);
+    }
+}
+
+function resetVideoPlayer(userSeq) {
+    const player = document.getElementById(`video-player-${userSeq}`);
+    const shell = document.getElementById(`video-player-shell-${userSeq}`);
+    const placeholder = shell?.querySelector(".video-player-placeholder");
+    const controls = document.getElementById(`video-controls-${userSeq}`);
+    const seek = document.getElementById(`video-seek-${userSeq}`);
+    const timeLabel = document.getElementById(`video-time-${userSeq}`);
+    const meta = document.getElementById(`video-player-meta-${userSeq}`);
+    if (player) {
+        player.pause();
+        player.removeAttribute("src");
+        player.load();
+        player.classList.add("hudit-hidden");
+    }
+    if (placeholder) {
+        placeholder.classList.remove("hudit-hidden");
+    }
+    if (controls) {
+        controls.classList.add("hudit-hidden");
+    }
+    if (seek) {
+        seek.value = "0";
+        seek.max = "0";
+        delete seek.dataset.seeking;
+    }
+    if (timeLabel) {
+        timeLabel.textContent = "0:00 / 0:00";
+    }
+    if (meta) {
+        meta.textContent = "";
+    }
+    if (shell) {
+        shell.classList.remove("is-active", "controls-open");
+    }
+    if (expandedVideoUserSeq === userSeq) {
+        activeVideoSeq = null;
+    }
+}
+
+async function toggleVideoPanel(userSeq) {
+    const scrollAnchor = captureScrollAnchor(userSeq);
+
+    if (expandedVideoUserSeq === userSeq) {
+        resetVideoPlayer(userSeq);
+        expandedVideoUserSeq = null;
+        updateVideoPanelVisibility(userSeq, false);
+        restoreScrollAnchor(userSeq, scrollAnchor);
+        return;
+    }
+
+    if (expandedVideoUserSeq) {
+        resetVideoPlayer(expandedVideoUserSeq);
+        updateVideoPanelVisibility(expandedVideoUserSeq, false);
+    }
+
+    expandedVideoUserSeq = userSeq;
+    activeVideoSeq = null;
+    updateVideoPanelVisibility(userSeq, true);
+    restoreScrollAnchor(userSeq, scrollAnchor);
+
+    bindVideoPanelEvents(userSeq);
+    bindVideoPlayerControls(userSeq);
+    if (videoPanelCache[userSeq]) {
+        renderVideoTypeFilter(userSeq, videoPanelCache[userSeq]);
+        renderVideoPanel(userSeq);
+    } else {
+        await loadVideoPanel(userSeq, scrollAnchor);
+    }
+}
+
+function bindVideoPanelEvents(userSeq) {
+    const filter = document.getElementById(`video-filter-${userSeq}`);
+    if (filter && !filter.dataset.bound) {
+        filter.dataset.bound = "1";
+        filter.addEventListener("change", () => {
+            videoPanelFilters[userSeq] = filter.value;
+            if (expandedVideoUserSeq === userSeq) {
+                activeVideoSeq = null;
+                resetVideoPlayer(userSeq);
+            }
+            renderVideoPanel(userSeq);
+        });
+    }
+}
+
+function renderVideoTypeFilter(userSeq, rows) {
+    const select = document.getElementById(`video-filter-${userSeq}`);
+    if (!select) {
+        return;
+    }
+    const types = [...new Set(rows.map(row => row.contentType).filter(Boolean))].sort();
+    const current = videoPanelFilters[userSeq] || "";
+    select.innerHTML = `<option value="">전체 (${rows.length})</option>` +
+        types.map(type => {
+            const count = rows.filter(row => row.contentType === type).length;
+            const label = CONTENT_TYPE_LABELS[type] || type;
+            return `<option value="${escapeHtml(type)}">${escapeHtml(label)} (${count})</option>`;
+        }).join("");
+    if (current && types.includes(current)) {
+        select.value = current;
+    } else {
+        select.value = "";
+        videoPanelFilters[userSeq] = "";
+    }
+}
+
+function filteredVideoRows(userSeq) {
+    const rows = videoPanelCache[userSeq] || [];
+    const filter = videoPanelFilters[userSeq] || "";
+    if (!filter) {
+        return rows;
+    }
+    return rows.filter(row => row.contentType === filter);
+}
+
+function renderVideoPanelStats(userSeq, rows) {
+    const stats = document.getElementById(`video-stats-${userSeq}`);
+    if (!stats) {
+        return;
+    }
+    const totalBytes = rows.reduce((sum, row) => sum + (Number(row.fileSize) || 0), 0);
+    const missing = rows.filter(row => !row.fileExists).length;
+    stats.innerHTML = `
+        <div class="video-stat-card">
+            <span class="video-stat-label">등록 영상</span>
+            <strong class="video-stat-value">${rows.length}건</strong>
+        </div>
+        <div class="video-stat-card">
+            <span class="video-stat-label">총 용량</span>
+            <strong class="video-stat-value">${formatFileSize(totalBytes)}</strong>
+        </div>
+        <div class="video-stat-card ${missing ? "video-stat-card--warn" : ""}">
+            <span class="video-stat-label">파일 누락</span>
+            <strong class="video-stat-value">${missing}건</strong>
+        </div>
+    `;
+}
+
+function renderVideoPanel(userSeq) {
+    const tbody = document.getElementById(`video-list-body-${userSeq}`);
+    const rows = videoPanelCache[userSeq] || [];
+    if (!tbody) {
+        return;
+    }
+    renderVideoPanelStats(userSeq, rows);
+    const filtered = filteredVideoRows(userSeq);
+
+    if (!filtered.length) {
+        tbody.innerHTML = `<tr><td colspan="7" class="hudit-empty">${rows.length ? "선택한 유형의 영상이 없습니다." : "저장된 영상이 없습니다."}</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = filtered.map(row => {
+        const canPlay = row.fileExists;
+        const activeClass = expandedVideoUserSeq === userSeq && activeVideoSeq === row.seq ? "video-row-active" : "";
+        return `
+        <tr class="${activeClass}" data-video-seq="${row.seq}">
+            <td class="video-cell-date">${escapeHtml(row.createdAt || "-")}</td>
+            <td>${formatContentType(row.contentType)}</td>
+            <td class="video-cell-point">${escapeHtml(row.contentPoint ?? "-")}</td>
+            <td class="video-cell-name" title="${escapeHtml(row.originalName || row.fileVideo || "")}">${escapeHtml(row.originalName || "-")}</td>
+            <td>${formatFileSize(row.fileSize)}</td>
+            <td>${formatVideoStatus(row.fileExists)}</td>
+            <td class="col-actions">
+                <div class="hudit-table-actions">
+                    <button class="hudit-btn hudit-btn-secondary hudit-btn-xs" data-video-play="${row.seq}" data-user-seq="${userSeq}" type="button" ${canPlay ? "" : "disabled"}>재생</button>
+                    <button class="hudit-btn hudit-btn-secondary hudit-btn-xs" data-video-download="${row.seq}" data-user-seq="${userSeq}" type="button" ${canPlay ? "" : "disabled"}>받기</button>
+                    <button class="hudit-btn hudit-btn-danger hudit-btn-xs" data-video-delete="${row.seq}" data-user-seq="${userSeq}" type="button">삭제</button>
+                </div>
+            </td>
+        </tr>`;
+    }).join("");
+
+    tbody.querySelectorAll("[data-video-play]").forEach(button => {
+        button.addEventListener("click", () => playVideo(Number(button.dataset.videoPlay), Number(button.dataset.userSeq)));
+    });
+    tbody.querySelectorAll("[data-video-delete]").forEach(button => {
+        button.addEventListener("click", () => deleteVideo(Number(button.dataset.videoDelete), Number(button.dataset.userSeq)));
+    });
+    tbody.querySelectorAll("[data-video-download]").forEach(button => {
+        button.addEventListener("click", () => downloadVideo(Number(button.dataset.videoDownload), Number(button.dataset.userSeq)));
+    });
+}
+
+function sanitizeDownloadName(name) {
+    const cleaned = String(name ?? "").replace(/[\\/:*?"<>|]/g, "_").trim();
+    return cleaned || "video.mp4";
+}
+
+async function downloadVideo(seq, userSeq) {
+    const rows = videoPanelCache[userSeq] || [];
+    const row = rows.find(item => item.seq === seq);
+    const alertEl = document.getElementById(`video-panel-alert-${userSeq}`);
+    if (!row || !row.fileExists) {
+        showAlert(alertEl, "다운로드할 수 있는 파일이 없습니다.");
+        return;
+    }
+    clearAlert(alertEl);
+    try {
+        const response = await fetch(`${HUDIT_API}/mtalk/mbody/videos/${seq}/download`, {
+            credentials: "same-origin"
+        });
+        if (!response.ok) {
+            let message = `다운로드 실패 (${response.status})`;
+            try {
+                const body = await response.json();
+                if (body.message) {
+                    message = body.message;
+                }
+            } catch (_) {
+                // ignore
+            }
+            throw new Error(message);
+        }
+        const blob = await response.blob();
+        const filename = sanitizeDownloadName(row.originalName || `video-${seq}.mp4`);
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+    } catch (error) {
+        showAlert(alertEl, error.message);
+    }
+}
+
+function playVideo(seq, userSeq) {
+    const rows = videoPanelCache[userSeq] || [];
+    const row = rows.find(item => item.seq === seq);
+    if (!row || !row.fileExists) {
+        showAlert(document.getElementById(`video-panel-alert-${userSeq}`), "재생할 수 있는 파일이 없습니다.");
+        return;
+    }
+    clearAlert(document.getElementById(`video-panel-alert-${userSeq}`));
+    activeVideoSeq = seq;
+    renderVideoPanel(userSeq);
+
+    const player = document.getElementById(`video-player-${userSeq}`);
+    const shell = document.getElementById(`video-player-shell-${userSeq}`);
+    const placeholder = shell?.querySelector(".video-player-placeholder");
+    const controls = document.getElementById(`video-controls-${userSeq}`);
+    const meta = document.getElementById(`video-player-meta-${userSeq}`);
+    if (!player) {
+        return;
+    }
+    bindVideoPlayerControls(userSeq);
+    player.src = `${HUDIT_API}/mtalk/mbody/videos/${seq}/stream`;
+    player.classList.remove("hudit-hidden");
+    if (shell) {
+        shell.classList.add("is-active");
+    }
+    if (placeholder) {
+        placeholder.classList.add("hudit-hidden");
+    }
+    if (controls) {
+        controls.classList.remove("hudit-hidden");
+    }
+    if (meta) {
+        meta.textContent = `${CONTENT_TYPE_LABELS[row.contentType] || row.contentType} · 점수 ${row.contentPoint ?? "-"} · ${row.createdAt || "-"}`;
+    }
+    player.play().catch(() => {});
+    updateVideoControlState(userSeq);
+}
+
+async function deleteVideo(seq, userSeq) {
+    const rows = videoPanelCache[userSeq] || [];
+    const row = rows.find(item => item.seq === seq);
+    if (!row) {
+        return;
+    }
+    const label = CONTENT_TYPE_LABELS[row.contentType] || row.contentType;
+    const confirmed = window.confirm(
+        `[${label}] 영상 기록을 삭제할까요?\n\n파일도 함께 삭제됩니다. 이 작업은 되돌릴 수 없습니다.`
+    );
+    if (!confirmed) {
+        return;
+    }
+    try {
+        await huditFetch(`/mtalk/mbody/videos/${seq}?deleteFile=true`, { method: "DELETE" });
+        if (activeVideoSeq === seq) {
+            resetVideoPlayer(userSeq);
+        }
+        delete videoPanelCache[userSeq];
+        await loadMbodyVideoSummary();
+        const scrollAnchor = captureScrollAnchor(userSeq);
+        if (getUserVideoCount(userSeq) === 0) {
+            expandedVideoUserSeq = null;
+        }
+        renderUsers();
+        if (expandedVideoUserSeq === userSeq) {
+            restoreScrollAnchor(userSeq, scrollAnchor);
+        }
+        showAlert(document.getElementById("page-alert"), "영상을 삭제했습니다.", "success");
+    } catch (error) {
+        showAlert(document.getElementById(`video-panel-alert-${userSeq}`), error.message);
+    }
+}
+
+async function loadVideoPanel(userSeq, scrollAnchor = null) {
+    const tbody = document.getElementById(`video-list-body-${userSeq}`);
+    if (tbody) {
+        tbody.innerHTML = `<tr><td colspan="7" class="hudit-empty">불러오는 중...</td></tr>`;
+    }
+    clearAlert(document.getElementById(`video-panel-alert-${userSeq}`));
+
+    try {
+        videoPanelCache[userSeq] = await huditFetch(`/mtalk/mbody/users/${userSeq}/videos`);
+        renderVideoTypeFilter(userSeq, videoPanelCache[userSeq]);
+        renderVideoPanel(userSeq);
+        restoreScrollAnchor(userSeq, scrollAnchor);
+    } catch (error) {
+        videoPanelCache[userSeq] = [];
+        if (tbody) {
+            tbody.innerHTML = `<tr><td colspan="7" class="hudit-empty">영상 목록을 불러오지 못했습니다.</td></tr>`;
+        }
+        showAlert(document.getElementById(`video-panel-alert-${userSeq}`), error.message);
+        restoreScrollAnchor(userSeq, scrollAnchor);
+    }
+}
+
+async function confirmReset() {
+    if (!resetTargetSeq) {
+        return;
+    }
+    const customPassword = document.getElementById("reset-password").value.trim();
+    if (customPassword && customPassword.length < 4) {
+        showAlert(document.getElementById("page-alert"), "비밀번호는 4자 이상이어야 합니다.");
+        return;
+    }
+    try {
+        const body = customPassword ? { password: customPassword } : {};
+        const result = await huditFetch(`/mtalk/${activeService}/users/${resetTargetSeq}/reset-password`, {
+            method: "POST",
+            body: JSON.stringify(body)
+        });
+        document.getElementById("temp-password").textContent = result.tempPassword;
+        document.getElementById("reset-result").classList.remove("hudit-hidden");
+        document.getElementById("reset-form").classList.add("hudit-hidden");
+        document.getElementById("reset-confirm").classList.add("hudit-hidden");
+        await loadUsers();
+    } catch (error) {
+        showAlert(document.getElementById("page-alert"), error.message);
+        closeModal("reset-modal");
+    }
+}
+
+document.addEventListener("DOMContentLoaded", async () => {
+    const session = await requireAuth();
+    if (!session) {
+        return;
+    }
+
+    renderTabs();
+    setMbodyUiState();
+    renderDanceStarEditor();
+    renderMfaceItemGrid();
+    renderMsocialProgressGrid();
+    await loadUsers();
+
+    document.getElementById("create-user-btn").addEventListener("click", openCreateModal);
+    document.getElementById("modal-save").addEventListener("click", saveUser);
+    document.getElementById("modal-close").addEventListener("click", () => closeModal("user-modal"));
+    document.getElementById("modal-cancel").addEventListener("click", () => closeModal("user-modal"));
+    document.getElementById("reset-close").addEventListener("click", () => closeModal("reset-modal"));
+    document.getElementById("reset-cancel").addEventListener("click", () => closeModal("reset-modal"));
+    document.getElementById("reset-random").addEventListener("click", () => {
+        document.getElementById("reset-password").value = generateRandomPassword();
+    });
+    document.getElementById("reset-confirm").addEventListener("click", confirmReset);
+});
+</script>
+</body>
+</html>

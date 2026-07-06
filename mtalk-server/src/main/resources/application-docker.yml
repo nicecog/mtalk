@@ -1,0 +1,16 @@
+# Docker Compose 배포용 (PostgreSQL 18.4)
+spring:
+  datasource:
+    mbench:
+      url: jdbc:postgresql://postgres:5432/mbench
+      username: ${MBENCH_DB_USER:mtalk}
+      password: ${MBENCH_DB_PASSWORD:mtalk1234}
+    mbody:
+      url: jdbc:postgresql://postgres:5432/mbody_revised
+      username: ${MBODY_DB_USER:mtalk}
+      password: ${MBODY_DB_PASSWORD:mtalk1234}
+
+mbench:
+  upload-dir: /app/uploads/mbench
+app:
+  upload-dir: /app/uploads/mbody

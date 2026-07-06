@@ -1,0 +1,40 @@
+services:
+  postgres:
+    image: postgres:18.4-alpine
+    container_name: mtalk-postgres
+    environment:
+      POSTGRES_USER: mtalk
+      POSTGRES_PASSWORD: mtalk1234
+      POSTGRES_DB: postgres
+    ports:
+      - "5434:5432"
+    volumes:
+      - mtalk-pg-data:/var/lib/postgresql
+      - ./docker/init-databases.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mtalk -d mbench"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  mtalk:
+    build: .
+    container_name: mtalk-server
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      MBENCH_DB_USER: mtalk
+      MBENCH_DB_PASSWORD: mtalk1234
+      MBODY_DB_USER: mtalk
+      MBODY_DB_PASSWORD: mtalk1234
+      MBENCH_ADMIN_PASSWORD: super-admin!@#$
+    volumes:
+      - mtalk-uploads:/app/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  mtalk-pg-data:
+  mtalk-uploads:
