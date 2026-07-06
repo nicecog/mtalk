@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+  <!--
+    런처 Activity 필수. tools:replace만 있는 빈 application은
+    Unity 병합 시 MAIN/LAUNCHER activity가 사라져 아이콘/열기 버튼이 비활성화됨.
+  -->
+  <application android:usesCleartextTraffic="true">
+    <activity
+        android:name="com.unity3d.player.UnityPlayerActivity"
+        android:theme="@style/UnityThemeSelector"
+        android:exported="true">
+      <intent-filter>
+        <action android:name="android.intent.action.MAIN" />
+        <category android:name="android.intent.category.LAUNCHER" />
+      </intent-filter>
+      <meta-data android:name="unityplayer.UnityActivity" android:value="true" />
+    </activity>
+  </application>
+</manifest>

@@ -1,0 +1,18 @@
+# M-Social_Clean 삭제 파일 목록 (2026-06-10)
+
+## C# 스크립트 (미사용 확정)
+Assets/audioso.cs
+Assets/Stage1Breath.cs
+Assets/ItemSelect.cs
+Assets/InfoWindow.cs
+Assets/InstructionChange.cs
+Assets/InstructionChange2.cs
+
+## 씬
+Assets/Scenes/SampleScene.unity
+
+## NatSuite NatCorder (전체)
+Assets/NatSuite/
+
+## 미디어 (2026-06-10, GUID+파일명+코드 미참조)
+# PNG 93개 + MP3 12개 — 전체 목록: docs/media-deleted-files.txt

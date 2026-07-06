@@ -1,0 +1,164 @@
+{
+  "version": 1,
+  "description": "Stage1 feedback StreamingAssets MP4: Korean legacyFileName -> fb_XXX",
+  "entries": [
+    {
+      "index": 0,
+      "id": "fb_001",
+      "legacyFileName": "숫자세기 트레이닝 영상.mp4",
+      "category": "CountNumber",
+      "feedbackPage": "CountNumber",
+      "newFileName": "fb_001.mp4",
+      "legacyRel": "숫자세기 트레이닝 영상.mp4",
+      "newRel": "fb_001.mp4"
+    },
+    {
+      "index": 1,
+      "id": "fb_002",
+      "legacyFileName": "M-SOCIAL 연주해보기_바디_1(Adventure Band).mp4",
+      "category": "PlayInstrument",
+      "feedbackPage": "PlayInstrument",
+      "group": "body",
+      "newFileName": "fb_002.mp4",
+      "legacyRel": "M-SOCIAL 연주해보기_바디_1(Adventure Band).mp4",
+      "newRel": "fb_002.mp4"
+    },
+    {
+      "index": 2,
+      "id": "fb_003",
+      "legacyFileName": "M-SOCIAL 연주해보기_바디_2 (Fly With Me).mp4",
+      "category": "PlayInstrument",
+      "feedbackPage": "PlayInstrument",
+      "group": "body",
+      "newFileName": "fb_003.mp4",
+      "legacyRel": "M-SOCIAL 연주해보기_바디_2 (Fly With Me).mp4",
+      "newRel": "fb_003.mp4"
+    },
+    {
+      "index": 3,
+      "id": "fb_004",
+      "legacyFileName": "M-SOCIAL 연주해보기_바디_3 (Ready And Go).mp4",
+      "category": "PlayInstrument",
+      "feedbackPage": "PlayInstrument",
+      "group": "body",
+      "newFileName": "fb_004.mp4",
+      "legacyRel": "M-SOCIAL 연주해보기_바디_3 (Ready And Go).mp4",
+      "newRel": "fb_004.mp4"
+    },
+    {
+      "index": 4,
+      "id": "fb_005",
+      "legacyFileName": "M-SOCIAL 연주해보기_바디_4 (Wind Maker).mp4",
+      "category": "PlayInstrument",
+      "feedbackPage": "PlayInstrument",
+      "group": "body",
+      "newFileName": "fb_005.mp4",
+      "legacyRel": "M-SOCIAL 연주해보기_바디_4 (Wind Maker).mp4",
+      "newRel": "fb_005.mp4"
+    },
+    {
+      "index": 5,
+      "id": "fb_006",
+      "legacyFileName": "M-SOCIAL 연주해보기_사운드 1.mp4",
+      "category": "PlayInstrument",
+      "feedbackPage": "PlayInstrument",
+      "group": "sound",
+      "newFileName": "fb_006.mp4",
+      "legacyRel": "M-SOCIAL 연주해보기_사운드 1.mp4",
+      "newRel": "fb_006.mp4"
+    },
+    {
+      "index": 6,
+      "id": "fb_007",
+      "legacyFileName": "M-SOCIAL 연주해보기_사운드 2.mp4",
+      "category": "PlayInstrument",
+      "feedbackPage": "PlayInstrument",
+      "group": "sound",
+      "newFileName": "fb_007.mp4",
+      "legacyRel": "M-SOCIAL 연주해보기_사운드 2.mp4",
+      "newRel": "fb_007.mp4"
+    },
+    {
+      "index": 7,
+      "id": "fb_008",
+      "legacyFileName": "M-SOCIAL 연주해보기_사운드 3.mp4",
+      "category": "PlayInstrument",
+      "feedbackPage": "PlayInstrument",
+      "group": "sound",
+      "newFileName": "fb_008.mp4",
+      "legacyRel": "M-SOCIAL 연주해보기_사운드 3.mp4",
+      "newRel": "fb_008.mp4"
+    },
+    {
+      "index": 8,
+      "id": "fb_009",
+      "legacyFileName": "M-SOCIAL 연주해보기_사운드 4.mp4",
+      "category": "PlayInstrument",
+      "feedbackPage": "PlayInstrument",
+      "group": "sound",
+      "newFileName": "fb_009.mp4",
+      "legacyRel": "M-SOCIAL 연주해보기_사운드 4.mp4",
+      "newRel": "fb_009.mp4"
+    },
+    {
+      "index": 9,
+      "id": "fb_010",
+      "legacyFileName": "M-SOCIAL 춤추기_1 (날봐줘).mp4",
+      "category": "Dance",
+      "feedbackPage": "Dance",
+      "newFileName": "fb_010.mp4",
+      "legacyRel": "M-SOCIAL 춤추기_1 (날봐줘).mp4",
+      "newRel": "fb_010.mp4"
+    },
+    {
+      "index": 10,
+      "id": "fb_011",
+      "legacyFileName": "M-SOCIAL 춤추기_2 (날아봐).mp4",
+      "category": "Dance",
+      "feedbackPage": "Dance",
+      "newFileName": "fb_011.mp4",
+      "legacyRel": "M-SOCIAL 춤추기_2 (날아봐).mp4",
+      "newRel": "fb_011.mp4"
+    },
+    {
+      "index": 11,
+      "id": "fb_012",
+      "legacyFileName": "M-SOCIAL 춤추기_3 (스웨그).mp4",
+      "category": "Dance",
+      "feedbackPage": "Dance",
+      "newFileName": "fb_012.mp4",
+      "legacyRel": "M-SOCIAL 춤추기_3 (스웨그).mp4",
+      "newRel": "fb_012.mp4"
+    },
+    {
+      "index": 12,
+      "id": "fb_013",
+      "legacyFileName": "M-SOCIAL 춤추기_4 (연주).mp4",
+      "category": "Dance",
+      "feedbackPage": "Dance",
+      "newFileName": "fb_013.mp4",
+      "legacyRel": "M-SOCIAL 춤추기_4 (연주).mp4",
+      "newRel": "fb_013.mp4"
+    },
+    {
+      "index": 13,
+      "id": "fb_014",
+      "legacyFileName": "M-SOCIAL 호흡 트레이닝_균일.mp4",
+      "category": "Breath",
+      "feedbackPage": "Breath",
+      "newFileName": "fb_014.mp4",
+      "legacyRel": "M-SOCIAL 호흡 트레이닝_균일.mp4",
+      "newRel": "fb_014.mp4"
+    },
+    {
+      "index": 14,
+      "id": "fb_015",
+      "legacyFileName": "M-SOCIAL 호흡 트레이닝_박스.mp4",
+      "category": "Breath",
+      "feedbackPage": "Breath",
+      "newFileName": "fb_015.mp4",
+      "legacyRel": "M-SOCIAL 호흡 트레이닝_박스.mp4",
+      "newRel": "fb_015.mp4"
+    }
+  ]
+}

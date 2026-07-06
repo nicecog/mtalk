@@ -84,3 +84,7 @@ crashlytics-build.properties
 
 # Build & verification logs at project root
 /*.log
+
+# Repo-wide extras
+.npm_cache/
+secrets/

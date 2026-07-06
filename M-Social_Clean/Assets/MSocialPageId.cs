@@ -1,0 +1,26 @@
+public enum MSocialPageId
+{
+    None = 0,
+    Background,
+    IntroLogo,
+    Login,
+    IntroMovie,
+    Stage1Start,
+    Stage1Intro,
+    Stage1SelectMap,
+    Stage1SelectScene,
+    Stage1WatchScene,
+    Stage1Positive,
+    Stage1Negative,
+    Stage1Feedback,
+    Stage1End,
+    Stage2Start,
+    Stage2Intro,
+    Stage2Select,
+    Stage2WatchScene,
+    ActSelect,
+    ResultPositive,
+    ResultNegative,
+    PositiveFeedback,
+    EndPage
+}

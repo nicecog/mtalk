@@ -1,0 +1,6 @@
+<linker>
+  <assembly fullname="Assembly-CSharp" preserve="all" />
+  <assembly fullname="UnityEngine.CoreModule">
+    <namespace fullname="UnityEngine.Networking" preserve="all" />
+  </assembly>
+</linker>

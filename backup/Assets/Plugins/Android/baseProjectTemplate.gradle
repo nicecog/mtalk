@@ -1,0 +1,10 @@
+plugins {
+    // Keep this aligned with the Gradle version bundled in Unity 6.
+    id 'com.android.application' version '8.10.0' apply false
+    id 'com.android.library' version '8.10.0' apply false
+    **BUILD_SCRIPT_DEPS**
+}
+
+tasks.register('clean', Delete) {
+    delete rootProject.layout.buildDirectory
+}

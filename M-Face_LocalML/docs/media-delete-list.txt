@@ -1,0 +1,49 @@
+﻿Assets\Logo1.png
+Assets\Page\colorpaper.png
+Assets\Page\guage_original.png
+Assets\Page\P21-reward.png
+Assets\Page\P25-Incorrect.png
+Assets\Page\P28-Background.png
+Assets\Page\P28-big light.png
+Assets\Page\P28-Rotate.png
+Assets\Page\P1-3\P3.png
+Assets\Page\P10-11\P10-NextButton.png
+Assets\Page\P10-11\P19-Tutorial.png
+Assets\Page\P17-19\P18-Intro.png
+Assets\Page\P20\P20-Unlocked.png
+Assets\Page\P26\biglight 1.png
+Assets\Page\P26\P28.png
+Assets\Page\P30\P29-Star.png
+Assets\Page\P30\P30-ItemContainingBox.png
+Assets\Page\P4-5\P5.png
+Assets\Page\P6\anger box(s).png
+Assets\Page\P6\happy box(s).png
+Assets\Page\P6\Neutral box(s).png
+Assets\Page\P6\sad box(s).png
+Assets\Page\Sprites\spike logo.png
+Assets\Page\Sprites\Item-duplicated2\P30-tiara.png
+Assets\Page\Sprites\Item-duplicated2\마이크.png
+Assets\Page\Sprites\Item-duplicated2\반지.png
+Assets\Page\Sprites\Item-duplicated2\버스.png
+Assets\Page\Sprites\Item-duplicated2\식판.png
+Assets\Page\Sprites\Item-duplicated2\아이스크림.png
+Assets\Page\Sprites\Item-duplicated2\자전거.png
+Assets\Page\Sprites\Item-duplicated2\휴대용 게임기.png
+Assets\Page\Sprites\Item-duplicated3\P30-tiara.png
+Assets\Page\Sprites\Item-duplicated3\마이크.png
+Assets\Page\Sprites\Item-duplicated3\반지.png
+Assets\Page\Sprites\Item-duplicated3\버스.png
+Assets\Page\Sprites\Item-duplicated3\식판.png
+Assets\Page\Sprites\Item-duplicated3\아이스크림.png
+Assets\Page\Sprites\Item-duplicated3\자전거.png
+Assets\Page\Sprites\Item-duplicated3\휴대용 게임기.png
+Assets\아이템 획득 축하.mp3
+Assets\MUZI 성우 녹음\FACE_S12_1.mp3
+Assets\MUZI 성우 녹음\FACE_S12_2.mp3
+Assets\MUZI 성우 녹음\FACE_S12_3.mp3
+Assets\MUZI 성우 녹음\FACE_S12_4.mp3
+Assets\MUZI 성우 녹음\FACE_S13.mp3
+Assets\MUZI 성우 녹음\FACE_S15_1.mp3
+Assets\MUZI 성우 녹음\FACE_S15_2.mp3
+Assets\MUZI 성우 녹음\FACE_S15_3.mp3
+Assets\MUZI 성우 녹음\FACE_S15_4.mp3

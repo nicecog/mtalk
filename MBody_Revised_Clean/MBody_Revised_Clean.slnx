@@ -1,0 +1,15 @@
+﻿<Solution>
+  <Project Path="Assembly-CSharp.csproj" />
+  <Project Path="Mediapipe.BlazePose.Runtime.csproj" />
+  <Project Path="Unity.Barracuda.csproj" />
+  <Project Path="Mediapipe.PoseLandmark.Runtime.csproj" />
+  <Project Path="NatSuite.Recorders.csproj" />
+  <Project Path="Unity.Barracuda.ONNX.csproj" />
+  <Project Path="Unity.Barracuda.MacBLAS.csproj" />
+  <Project Path="Unity.Barracuda.Editor.csproj" />
+  <Project Path="Unity.Barracuda.Editor.Tests.csproj" />
+  <Project Path="Assembly-CSharp-Editor.csproj" />
+  <Project Path="Mediapipe.PoseDetection.Runtime.csproj" />
+  <Project Path="Unity.Barracuda.BurstBLAS.csproj" />
+  <Project Path="Unity.Barracuda.iOSBLAS.csproj" />
+</Solution>

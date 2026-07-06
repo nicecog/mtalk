@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1045 &1
+EditorBuildSettings:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Scenes:
+  - enabled: 1
+    path: Assets/Scenes/MBody.unity
+    guid: 9b8aa951672811048b680be15e313853
+  - enabled: 1
+    path: Assets/Scenes/Login.unity
+    guid: 0daf5f6d8fff9744fbea12d68cda8b7a
+  - enabled: 1
+    path: Assets/Scenes/MBodyBodyPack.unity
+    guid: aeb14cafd41ec28458229029ee782d0a
+  - enabled: 1
+    path: Assets/Scenes/MBodyDancePack.unity
+    guid: ab846c9fec0d9284c8e2e369a14b69c6
+  m_configObjects: {}
+  m_UseUCBPForAssetBundles: 0
