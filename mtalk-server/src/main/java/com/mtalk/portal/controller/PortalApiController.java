@@ -272,7 +272,7 @@ public class PortalApiController {
     @PutMapping("/cnt/centers/{no}")
     public PortalCntCenterResponse updateCntCenter(
             @PathVariable long no,
-            @RequestBody PortalCntUpdateCenterRequest request,
+            @Valid @RequestBody PortalCntUpdateCenterRequest request,
             HttpSession session
     ) {
         return portalCntService.updateCenter(no, request, session);

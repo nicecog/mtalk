@@ -70,8 +70,13 @@
                                     </div>
                                 </div>
                                 <div class="hudit-form-group">
-                                    <label class="hudit-label">검사대상</label>
-                                    <input class="hudit-input" id="detail-session-label" readonly>
+                                    <label class="hudit-label" for="detail-max-session">검사 대상(구분)</label>
+                                    <select class="hudit-input" id="detail-max-session">
+                                        <option value="0">그룹 대상을 선택해주세요</option>
+                                        <option value="1">유아</option>
+                                        <option value="2">성인</option>
+                                        <option value="3">3~4세용</option>
+                                    </select>
                                 </div>
                             </div>
                             <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-top:0.5rem">
@@ -210,7 +215,7 @@
         <div class="hudit-modal-body">
             <div class="hudit-form-group">
                 <label class="hudit-label" for="new-center-id">센터 ID <span aria-hidden="true">*</span></label>
-                <input class="hudit-input" id="new-center-id" name="centerId" maxlength="255" autocomplete="off" required>
+                <input class="hudit-input" id="new-center-id" name="centerId" maxlength="20" autocomplete="off" required>
                 <small style="color:var(--hudit-muted);display:block;margin-top:0.4rem">
                     권장 형식: 대상 구분 K/E/M/H/U + 영문 2자 (예: KMB). 권장 형식과 달라도 생성할 수 있습니다.
                 </small>
@@ -220,7 +225,7 @@
             </div>
             <div class="hudit-form-group">
                 <label class="hudit-label" for="new-center-name">센터 명</label>
-                <input class="hudit-input" id="new-center-name" name="centerNm" maxlength="255" autocomplete="off">
+                <input class="hudit-input" id="new-center-name" name="centerNm" maxlength="200" autocomplete="off" required>
             </div>
             <div class="hudit-form-group" style="margin-bottom:0">
                 <span class="hudit-label">화면 노출 여부</span>
@@ -228,6 +233,15 @@
                     <label><input type="radio" name="new-center-open-yn" value="Y" checked> Yes</label>
                     <label><input type="radio" name="new-center-open-yn" value="N"> No</label>
                 </div>
+            </div>
+            <div class="hudit-form-group" style="margin-bottom:0">
+                <label class="hudit-label" for="new-center-max-session">검사 대상(구분)</label>
+                <select class="hudit-input" id="new-center-max-session" name="maxSession">
+                    <option value="0">그룹 대상을 선택해주세요</option>
+                    <option value="1">유아</option>
+                    <option value="2">성인</option>
+                    <option value="3">3~4세용</option>
+                </select>
             </div>
         </div>
         <div class="hudit-modal-footer">
@@ -538,7 +552,7 @@ function fillCenterDetail(center) {
     document.getElementById("center-detail-title").textContent = `${center.centerNm || center.centerId} 센터 상세`;
     document.getElementById("detail-center-id").value = center.centerId || "";
     document.getElementById("detail-center-nm").value = center.centerNm || "";
-    document.getElementById("detail-session-label").value = center.sessionLabel || "-";
+    document.getElementById("detail-max-session").value = center.maxSession || "0";
     document.querySelectorAll("input[name='detail-open-yn']").forEach(input => {
         input.checked = input.value === (center.openYn || "Y");
     });
@@ -740,7 +754,8 @@ async function saveCenterDetail() {
     const openYnInput = document.querySelector("input[name='detail-open-yn']:checked");
     const body = {
         centerNm: document.getElementById("detail-center-nm").value.trim(),
-        openYn: openYnInput ? openYnInput.value : "Y"
+        openYn: openYnInput ? openYnInput.value : "Y",
+        maxSession: document.getElementById("detail-max-session").value
     };
     try {
         const updated = await huditFetch(`/cnt/centers/${selectedCenter.no}`, {
@@ -825,6 +840,7 @@ async function createCenter(event) {
     const centerId = document.getElementById("new-center-id").value.trim();
     const centerNm = document.getElementById("new-center-name").value.trim();
     const openYnInput = document.querySelector("input[name='new-center-open-yn']:checked");
+    const maxSession = document.getElementById("new-center-max-session").value;
 
     if (!centerId) {
         document.getElementById("new-center-id").focus();
@@ -840,7 +856,8 @@ async function createCenter(event) {
             body: JSON.stringify({
                 centerId,
                 centerNm,
-                openYn: openYnInput ? openYnInput.value : "Y"
+                openYn: openYnInput ? openYnInput.value : "Y",
+                maxSession
             })
         });
         setCreateCenterModal(false);

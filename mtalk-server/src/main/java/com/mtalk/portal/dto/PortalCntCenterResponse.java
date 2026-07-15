@@ -5,6 +5,7 @@ public record PortalCntCenterResponse(
         String centerId,
         String centerNm,
         String openYn,
+        String maxSession,
         String sessionLabel,
         String auditDt
 ) {

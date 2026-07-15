@@ -144,6 +144,9 @@ public class PortalCntService {
         String openYn = request.openYn() == null || request.openYn().isBlank()
                 ? "Y"
                 : request.openYn().trim().toUpperCase();
+        String maxSession = request.maxSession() == null || request.maxSession().isBlank()
+                ? "0"
+                : request.maxSession().trim();
 
         Long duplicateCount = cntJdbcTemplate.queryForObject(
                 "SELECT COUNT(*) FROM cnt_center WHERE center_id = :centerId",
@@ -157,13 +160,14 @@ public class PortalCntService {
         try {
             cntJdbcTemplate.update(
                     """
-                    INSERT INTO cnt_center (center_id, center_nm, open_yn, audit_dt)
-                    VALUES (:centerId, :centerNm, :openYn, :auditDt)
+                    INSERT INTO cnt_center (center_id, center_nm, open_yn, max_session, audit_dt)
+                    VALUES (:centerId, :centerNm, :openYn, :maxSession, :auditDt)
                     """,
                     new MapSqlParameterSource()
                             .addValue("centerId", centerId)
                             .addValue("centerNm", centerNm)
                             .addValue("openYn", openYn)
+                            .addValue("maxSession", maxSession)
                             .addValue("auditDt", Timestamp.valueOf(LocalDateTime.now()))
             );
         } catch (DuplicateKeyException ex) {
@@ -191,16 +195,27 @@ public class PortalCntService {
     public PortalCntCenterResponse updateCenter(long no, PortalCntUpdateCenterRequest request, HttpSession session) {
         portalAuthService.requirePortalAdmin(session);
         getCenter(no, session);
+        String centerNm = request.centerNm().trim();
+        String openYn = request.openYn() == null || request.openYn().isBlank()
+                ? "Y"
+                : request.openYn().trim().toUpperCase();
+        String maxSession = request.maxSession() == null || request.maxSession().isBlank()
+                ? "0"
+                : request.maxSession().trim();
         cntJdbcTemplate.update(
                 """
                 UPDATE cnt_center
-                SET center_nm = :centerNm, open_yn = :openYn, audit_dt = :auditDt
+                SET center_nm = :centerNm,
+                    open_yn = :openYn,
+                    max_session = :maxSession,
+                    audit_dt = :auditDt
                 WHERE no = :no
                 """,
                 new MapSqlParameterSource()
                         .addValue("no", no)
-                        .addValue("centerNm", request.centerNm())
-                        .addValue("openYn", request.openYn())
+                        .addValue("centerNm", centerNm)
+                        .addValue("openYn", openYn)
+                        .addValue("maxSession", maxSession)
                         .addValue("auditDt", Timestamp.valueOf(LocalDateTime.now()))
         );
         return getCenter(no, session);
@@ -538,6 +553,7 @@ public class PortalCntService {
                 centerId,
                 centerNm,
                 openYn,
+                maxSession,
                 formatSession(maxSession),
                 formatAuditDt(auditDt)
         );
