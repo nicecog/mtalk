@@ -17,7 +17,7 @@ CAFE24 VPS에 운영 중인 **HUDIT 통합 포털**에 CNT(뇌인지기능검사
 | 구분 | 내용 |
 |------|------|
 | UI | 센터/멤버 리스트, 회원생성·분석, 사용자별분석, PDF 개별·일괄 |
-| API | `/api/hudit/cnt/*` 12개 엔드포인트 |
+| API | `/api/hudit/cnt/*` 13개 엔드포인트 |
 | PDF | cnt.re.kr `pdf4th` HTML 프록시 + HTTPS 에셋 프록시 + 브라우저 일괄 ZIP |
 | 검증 | `Verify-HuditPortal.ps1` **27/27 PASS** |
 | 레거시 | cnt.re.kr Java/템플릿 **미수정** |
@@ -83,7 +83,7 @@ hudit.cnt:
 | DISPLAY | 10 / 20 / 30 / 100 |
 | 컬럼 | NO, 센터ID, 센터명, 노출여부, 검사대상, 비고 |
 | 비고 버튼 | 회원생성, 분석, **PDF 일괄** |
-| 센터 생성 | cnt.re.kr 외부 링크 (`createCenterUrl`) |
+| 센터 생성 | `POST /api/hudit/cnt/centers` — HUDIT 입력 화면에서 DB 직접 생성 |
 
 ### 3.3 3단계 — 멤버 리스트
 
@@ -107,6 +107,7 @@ hudit.cnt:
 
 | 기능 | API / 동작 |
 |------|------------|
+| 센터 생성 | `POST /api/hudit/cnt/centers` — 센터 ID 중복 확인 후 직접 생성 |
 | 센터 상세 조회 | `GET /api/hudit/cnt/centers/{no}` |
 | 센터 정보 저장 | `PUT /api/hudit/cnt/centers/{no}` — 센터명, 노출여부 |
 | 회원 일괄 생성 | `POST /api/hudit/cnt/centers/{no}/members/bulk` |
@@ -119,6 +120,12 @@ hudit.cnt:
 - User ID: `{센터ID}{3자리순번}` (예: `KMB041`)
 - 비밀번호: User ID와 동일 (BCrypt 인코딩)
 - 이름: `이름{n}`, 성별 교대, 나이 0
+
+**센터 ID 권장 형식**
+
+- 대상 구분 `K/E/M/H/U` + 영문 2자 (예: `KMB`)
+- 권장 형식과 다른 ID도 경고만 표시하고 생성 가능
+- 빈 ID와 기존 `center_id` 중복은 생성 불가
 
 **회원 일괄 생성 완료 알림 (추가)**
 
@@ -226,6 +233,7 @@ GET /api/hudit/cnt/pdf-assets/images/...
 |--------|------|------|
 | GET | `/cnt/config` | legacy URL, 외부 링크 |
 | GET | `/cnt/centers` | 센터 페이징·정렬 |
+| POST | `/cnt/centers` | 센터 생성 |
 | GET | `/cnt/centers/{no}` | 센터 상세 |
 | PUT | `/cnt/centers/{no}` | 센터 수정 |
 | POST | `/cnt/centers/{no}/members/bulk` | 회원 일괄 생성 |
@@ -338,7 +346,7 @@ cd mtalk\scripts
 | 화면 | 주요 액션 |
 |------|-----------|
 | 대시보드 | CNT 관리 진입 |
-| 센터 리스트 | 정렬·페이징, 회원생성, 분석, **PDF 일괄**, 센터 생성(외부) |
+| 센터 리스트 | 정렬·페이징, 센터·회원 생성, 분석, **PDF 일괄** |
 | 멤버 리스트 | 정렬·페이징, 분석, PDF |
 | 회원생성/분석 | 센터 저장, 회원 일괄 생성(alert), 멤버 목록, 분석, PDF |
 | 사용자별분석 | 5섹션 테이블, PDF, 이전 목록 |
@@ -386,7 +394,7 @@ cd mtalk\scripts
 |----------|------|
 | http://hudit.cafe24.com:8080/hudit/cnt | CNT 관리 UI |
 | http://cnt.re.kr/cnt/admin/members/{userId}/pdf4th | PDF HTML 원본 |
-| http://cnt.re.kr | 레거시 CNT 관리 (센터 생성 등) |
+| http://cnt.re.kr | 레거시 CNT 관리 및 PDF HTML 원본 |
 
 ---
 

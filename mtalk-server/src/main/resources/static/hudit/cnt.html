@@ -23,7 +23,7 @@
 
     <main class="hudit-main">
         <h1 class="hudit-page-title">CNT 서비스 관리</h1>
-        <p class="hudit-page-subtitle">센터·회원 조회는 HUDIT에서, 생성·분석 상세는 기존 CNT 관리 페이지와 동일하게 연동합니다.</p>
+        <p class="hudit-page-subtitle">센터·회원 조회와 생성은 HUDIT에서 처리하며, 분석 상세와 PDF는 기존 CNT 데이터와 연동합니다.</p>
 
         <div id="page-alert"></div>
 
@@ -37,8 +37,8 @@
                 </div>
 
                 <div class="hudit-external-banner" id="centers-banner">
-                    <p>센터 생성은 기존 CNT 관리자 페이지를 사용합니다. PDF 일괄은 센터 행의 버튼으로 브라우저에서 생성합니다.</p>
-                    <a class="hudit-btn hudit-btn-primary hudit-btn-sm" id="create-center-btn" href="#" target="_blank" rel="noopener">+ Create New Center</a>
+                    <p>센터는 CNT DB에 직접 생성됩니다. PDF 일괄은 센터 행의 버튼으로 브라우저에서 생성합니다.</p>
+                    <button class="hudit-btn hudit-btn-primary hudit-btn-sm" id="create-center-btn" type="button">+ 센터 생성</button>
                 </div>
 
                 <div class="hudit-external-banner hudit-hidden" id="members-banner">
@@ -199,6 +199,42 @@
             </div>
         </div>
     </main>
+</div>
+
+<div id="create-center-modal" class="hudit-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="create-center-title" aria-hidden="true">
+    <form class="hudit-modal" id="create-center-form">
+        <div class="hudit-modal-header">
+            <h2 id="create-center-title">CNT 센터 생성</h2>
+            <button class="hudit-btn hudit-btn-secondary hudit-btn-sm" id="create-center-close-btn" type="button" aria-label="닫기">닫기</button>
+        </div>
+        <div class="hudit-modal-body">
+            <div class="hudit-form-group">
+                <label class="hudit-label" for="new-center-id">센터 ID <span aria-hidden="true">*</span></label>
+                <input class="hudit-input" id="new-center-id" name="centerId" maxlength="255" autocomplete="off" required>
+                <small style="color:var(--hudit-muted);display:block;margin-top:0.4rem">
+                    권장 형식: 대상 구분 K/E/M/H/U + 영문 2자 (예: KMB). 권장 형식과 달라도 생성할 수 있습니다.
+                </small>
+                <small class="hudit-hidden" id="center-id-advisory" style="color:#a56216;display:block;margin-top:0.35rem">
+                    권장 형식과 다릅니다. 확인 후 그대로 생성할 수 있습니다.
+                </small>
+            </div>
+            <div class="hudit-form-group">
+                <label class="hudit-label" for="new-center-name">센터 명</label>
+                <input class="hudit-input" id="new-center-name" name="centerNm" maxlength="255" autocomplete="off">
+            </div>
+            <div class="hudit-form-group" style="margin-bottom:0">
+                <span class="hudit-label">화면 노출 여부</span>
+                <div class="hudit-radio-group">
+                    <label><input type="radio" name="new-center-open-yn" value="Y" checked> Yes</label>
+                    <label><input type="radio" name="new-center-open-yn" value="N"> No</label>
+                </div>
+            </div>
+        </div>
+        <div class="hudit-modal-footer">
+            <button class="hudit-btn hudit-btn-secondary" id="create-center-cancel-btn" type="button">취소</button>
+            <button class="hudit-btn hudit-btn-primary" id="create-center-submit-btn" type="submit">센터 생성</button>
+        </div>
+    </form>
 </div>
 
 <div id="bulk-pdf-overlay" class="hudit-bulk-pdf-overlay hudit-hidden" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="bulk-pdf-title">
@@ -762,13 +798,72 @@ async function bulkCreateMembers() {
     }
 }
 
+function setCreateCenterModal(open) {
+    const modal = document.getElementById("create-center-modal");
+    modal.classList.toggle("open", open);
+    modal.setAttribute("aria-hidden", String(!open));
+    if (open) {
+        document.getElementById("create-center-form").reset();
+        document.getElementById("center-id-advisory").classList.add("hudit-hidden");
+        document.getElementById("new-center-id").focus();
+    }
+}
+
+function updateCenterIdAdvisory() {
+    const centerId = document.getElementById("new-center-id").value.trim();
+    const followsRecommendation = /^[KEMHU][A-Z]{2}$/i.test(centerId);
+    document.getElementById("center-id-advisory").classList.toggle(
+        "hudit-hidden",
+        !centerId || followsRecommendation
+    );
+}
+
+async function createCenter(event) {
+    event.preventDefault();
+    const alertBox = document.getElementById("page-alert");
+    const submitBtn = document.getElementById("create-center-submit-btn");
+    const centerId = document.getElementById("new-center-id").value.trim();
+    const centerNm = document.getElementById("new-center-name").value.trim();
+    const openYnInput = document.querySelector("input[name='new-center-open-yn']:checked");
+
+    if (!centerId) {
+        document.getElementById("new-center-id").focus();
+        return;
+    }
+
+    clearAlert(alertBox);
+    try {
+        submitBtn.disabled = true;
+        submitBtn.textContent = "생성 중...";
+        const created = await huditFetch("/cnt/centers", {
+            method: "POST",
+            body: JSON.stringify({
+                centerId,
+                centerNm,
+                openYn: openYnInput ? openYnInput.value : "Y"
+            })
+        });
+        setCreateCenterModal(false);
+        sortField = "no";
+        sortOrder = "desc";
+        page = 1;
+        renderSortBar();
+        await loadData();
+        showAlert(alertBox, `${created.centerId} 센터가 생성되었습니다.`, "success");
+    } catch (error) {
+        showAlert(alertBox, error.message);
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "센터 생성";
+    }
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
     const session = await requireAuth();
     if (!session) return;
 
     try {
         cntConfig = await huditFetch("/cnt/config");
-        document.getElementById("create-center-btn").href = cntConfig.createCenterUrl;
         document.getElementById("result-btn").href = cntConfig.resultUrl;
         document.getElementById("interpretation-btn").href = cntConfig.interpretationUrl;
     } catch (error) {
@@ -797,6 +892,21 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     document.getElementById("update-center-btn").addEventListener("click", saveCenterDetail);
     document.getElementById("bulk-create-btn").addEventListener("click", bulkCreateMembers);
+    document.getElementById("create-center-btn").addEventListener("click", () => setCreateCenterModal(true));
+    document.getElementById("create-center-close-btn").addEventListener("click", () => setCreateCenterModal(false));
+    document.getElementById("create-center-cancel-btn").addEventListener("click", () => setCreateCenterModal(false));
+    document.getElementById("create-center-form").addEventListener("submit", createCenter);
+    document.getElementById("new-center-id").addEventListener("input", updateCenterIdAdvisory);
+    document.getElementById("create-center-modal").addEventListener("click", event => {
+        if (event.target.id === "create-center-modal") {
+            setCreateCenterModal(false);
+        }
+    });
+    document.addEventListener("keydown", event => {
+        if (event.key === "Escape" && document.getElementById("create-center-modal").classList.contains("open")) {
+            setCreateCenterModal(false);
+        }
+    });
     document.getElementById("back-centers-btn").addEventListener("click", async () => {
         switchView("centers");
         await loadData();

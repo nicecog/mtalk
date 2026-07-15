@@ -2,6 +2,7 @@ package com.mtalk.portal.service;
 
 import com.mtalk.portal.dto.PortalCntCenterResponse;
 import com.mtalk.portal.dto.PortalCntConfigResponse;
+import com.mtalk.portal.dto.PortalCntCreateCenterRequest;
 import com.mtalk.portal.dto.PortalCntCreateMembersResponse;
 import com.mtalk.portal.dto.PortalCntMemberAnalysisResponse;
 import com.mtalk.portal.dto.PortalCntMemberAnalysisResponse.PortalCntAnalysisSection;
@@ -13,6 +14,7 @@ import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -127,6 +129,61 @@ public class PortalCntService {
         );
         if (rows.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "센터를 찾을 수 없습니다.");
+        }
+        return rows.getFirst();
+    }
+
+    public PortalCntCenterResponse createCenter(
+            PortalCntCreateCenterRequest request,
+            HttpSession session
+    ) {
+        portalAuthService.requirePortalAdmin(session);
+
+        String centerId = request.centerId().trim();
+        String centerNm = request.centerNm() == null ? "" : request.centerNm().trim();
+        String openYn = request.openYn() == null || request.openYn().isBlank()
+                ? "Y"
+                : request.openYn().trim().toUpperCase();
+
+        Long duplicateCount = cntJdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM cnt_center WHERE center_id = :centerId",
+                new MapSqlParameterSource("centerId", centerId),
+                Long.class
+        );
+        if (duplicateCount != null && duplicateCount > 0) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "이미 사용 중인 센터 ID입니다.");
+        }
+
+        try {
+            cntJdbcTemplate.update(
+                    """
+                    INSERT INTO cnt_center (center_id, center_nm, open_yn, audit_dt)
+                    VALUES (:centerId, :centerNm, :openYn, :auditDt)
+                    """,
+                    new MapSqlParameterSource()
+                            .addValue("centerId", centerId)
+                            .addValue("centerNm", centerNm)
+                            .addValue("openYn", openYn)
+                            .addValue("auditDt", Timestamp.valueOf(LocalDateTime.now()))
+            );
+        } catch (DuplicateKeyException ex) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "이미 사용 중인 센터 ID입니다.", ex);
+        }
+
+        List<PortalCntCenterResponse> rows = cntJdbcTemplate.query(
+                """
+                SELECT no, center_id, center_nm, open_yn, max_session, audit_dt
+                FROM cnt_center
+                WHERE center_id = :centerId
+                ORDER BY no DESC
+                LIMIT 1
+                """,
+                new MapSqlParameterSource("centerId", centerId),
+                (rs, rowNum) -> mapCenter(rs.getLong("no"), rs.getString("center_id"), rs.getString("center_nm"),
+                        rs.getString("open_yn"), rs.getString("max_session"), rs.getTimestamp("audit_dt"))
+        );
+        if (rows.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "센터 생성 결과를 확인할 수 없습니다.");
         }
         return rows.getFirst();
     }

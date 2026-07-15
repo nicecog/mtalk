@@ -6,6 +6,7 @@ import com.mtalk.mface.dto.UpdateFaceProgressRequest;
 import com.mtalk.msocial.dto.UpdateSocialProgressRequest;
 import com.mtalk.portal.dto.PortalCntCenterResponse;
 import com.mtalk.portal.dto.PortalCntConfigResponse;
+import com.mtalk.portal.dto.PortalCntCreateCenterRequest;
 import com.mtalk.portal.dto.PortalCntCreateMembersRequest;
 import com.mtalk.portal.dto.PortalCntCreateMembersResponse;
 import com.mtalk.portal.dto.PortalCntMemberAnalysisResponse;
@@ -25,7 +26,6 @@ import com.mtalk.portal.service.PortalCntService;
 import com.mtalk.portal.service.PortalMtalkUserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
-import jakarta.validation.Valid;
 import jakarta.validation.Valid;
 import org.springframework.core.io.support.ResourceRegion;
 import org.springframework.http.ResponseEntity;
@@ -259,6 +259,14 @@ public class PortalApiController {
             HttpSession session
     ) {
         return portalCntService.getCenter(no, session);
+    }
+
+    @PostMapping("/cnt/centers")
+    public PortalCntCenterResponse createCntCenter(
+            @Valid @RequestBody PortalCntCreateCenterRequest request,
+            HttpSession session
+    ) {
+        return portalCntService.createCenter(request, session);
     }
 
     @PutMapping("/cnt/centers/{no}")
