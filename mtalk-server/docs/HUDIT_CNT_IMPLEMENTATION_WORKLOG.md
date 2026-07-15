@@ -109,7 +109,7 @@ hudit.cnt:
 |------|------------|
 | 센터 생성 | `POST /api/hudit/cnt/centers` — 센터 ID 중복 확인 후 직접 생성 |
 | 센터 상세 조회 | `GET /api/hudit/cnt/centers/{no}` |
-| 센터 정보 저장 | `PUT /api/hudit/cnt/centers/{no}` — 센터명, 노출여부 |
+| 센터 정보 저장 | `PUT /api/hudit/cnt/centers/{no}` — 센터명, 노출여부, 검사대(`max_session`) |
 | 회원 일괄 생성 | `POST /api/hudit/cnt/centers/{no}/members/bulk` |
 | 센터별 멤버 목록 | `GET /api/hudit/cnt/members?centerId={id}` |
 | 회원생성 모드 | 회원 생성 UI + 센터 정보 저장 표시 |
@@ -126,6 +126,19 @@ hudit.cnt:
 - 대상 구분 `K/E/M/H/U` + 영문 2자 (예: `KMB`)
 - 권장 형식과 다른 ID도 경고만 표시하고 생성 가능
 - 빈 ID와 기존 `center_id` 중복은 생성 불가
+
+**센터 생성·수정 공통 — 검사 대(구분) `max_session`**
+
+| value | 표시 |
+|-------|------|
+| `0` | 그룹 대상을 선택해주세요 |
+| `1` | 유아 |
+| `2` | 성인 |
+| `3` | 3~4세용 |
+
+- 생성: `POST /cnt/centers` body `maxSession`
+- 수정: `PUT /cnt/centers/{no}` body `maxSession`
+- cnt.re.kr edit 화면에는 검사대 수정 UI 없음 → HUDIT 상세에서 수정 가능
 
 **회원 일괄 생성 완료 알림 (추가)**
 
@@ -246,7 +259,9 @@ GET /api/hudit/cnt/pdf-assets/images/...
 
 | DTO | 필드 |
 |-----|------|
-| `PortalCntCenterResponse` | no, centerId, centerNm, openYn, sessionLabel, auditDt |
+| `PortalCntCenterResponse` | no, centerId, centerNm, openYn, maxSession, sessionLabel, auditDt |
+| `PortalCntCreateCenterRequest` | centerId, centerNm, openYn, maxSession |
+| `PortalCntUpdateCenterRequest` | centerNm, openYn, maxSession |
 | `PortalCntMemberResponse` | no, userId, userName, centerId, centerNm, userAge |
 | `PortalCntCreateMembersResponse` | createdCount, centerId, firstUserId, lastUserId |
 | `PortalCntMemberAnalysisResponse` | member, sections[] |
@@ -379,6 +394,9 @@ cd mtalk\scripts
 | 8 | 일괄 진행 UI (총건수·완료·에러·취소) |
 | 9 | html2pdf `Invalid margin array` 수정 (iframe 내부 실행) |
 | 10 | 회원 일괄 생성 alert + firstUserId/lastUserId 응답 |
+| 11 | HUDIT 센터 생성 (cnt.re.kr 외부 링크 제거, DB INSERT) — `a5480f3` |
+| 12 | 센터 생성·수정에 `max_session`(검사대) 추가, 조직명·노출 수정 — `d1eee24` |
+| 13 | 조직명 변경 DB 영향도 분석 (운영 DB 확인, 영향 낮음) |
 
 ---
 
@@ -389,6 +407,7 @@ cd mtalk\scripts
 | CAFE24 VPS 배포 리포트 | `docs/CAFE24_VPS_DEPLOYMENT_REPORT.md` |
 | MTALK API 검증 | `docs/MTALK_API_VERIFICATION_LATEST.md` |
 | 본 작업 정리 | `docs/HUDIT_CNT_IMPLEMENTATION_WORKLOG.md` (이 문서) |
+| 2026-07-15 세션 종합 | `docs/HUDIT_CNT_SESSION_20260715.md` |
 
 | 외부 URL | 용도 |
 |----------|------|
