@@ -64,10 +64,9 @@ def main() -> int:
 
     deploy_cmd = (
         "cd /opt/mtalk && "
-        "docker compose down 2>/dev/null || true; "
-        "docker compose build --no-cache; "
+        "docker compose build; "
         "docker compose up -d; "
-        "sleep 18; "
+        "sleep 12; "
         "docker compose ps; "
         "curl -sf http://127.0.0.1:8080/health; "
         "echo; echo DEPLOY_OK"

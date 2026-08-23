@@ -198,6 +198,13 @@ a:hover {
     margin: 0 auto 1rem;
 }
 
+.hudit-login-header .cnthudit-login-logo {
+    display: block;
+    width: min(240px, 82%);
+    height: auto;
+    margin: 0 auto 1rem;
+}
+
 .hudit-login-header h1 {
     margin: 0 0 0.35rem;
     font-size: 1.75rem;

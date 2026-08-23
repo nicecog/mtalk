@@ -35,12 +35,32 @@ services:
       CNT_DB_USER: ${CNT_DB_USER:-huditcnt}
       CNT_DB_PASSWORD: ${CNT_DB_PASSWORD:-}
       CNT_LEGACY_BASE_URL: ${CNT_LEGACY_BASE_URL:-http://cnt.re.kr}
+      CNT_HUDIT_BASE_URL: ${CNT_HUDIT_BASE_URL:-http://huditcnt.cafe24.com}
+      CNT_HUDIT_INTERNAL_BASE_URL: ${CNT_HUDIT_INTERNAL_BASE_URL:-http://huditcnt.cafe24.com}
+      CNT_HUDIT_PDF_TEMPLATE_SUFFIX: ${CNT_HUDIT_PDF_TEMPLATE_SUFFIX:-pdf}
+      CNTHUDIT_PUBLIC_BASE_URL: ${CNTHUDIT_PUBLIC_BASE_URL:-https://huditcnt.cafe24.com}
+      CNTHUDIT_ENTRY_TICKET_SECRET: ${CNTHUDIT_ENTRY_TICKET_SECRET:-}
+      CNT_HUDIT_DB_HOST: ${CNT_HUDIT_DB_HOST:-huditcnt.cafe24.com}
+      CNT_HUDIT_DB_PORT: ${CNT_HUDIT_DB_PORT:-3306}
+      CNT_HUDIT_DB_NAME: ${CNT_HUDIT_DB_NAME:-dbhuditcnt}
+      CNT_HUDIT_DB_USER: ${CNT_HUDIT_DB_USER:-huditcnt}
+      CNT_HUDIT_DB_PASSWORD: ${CNT_HUDIT_DB_PASSWORD:-}
+    extra_hosts:
+      - "huditcnt.cafe24.com:1.234.79.146"
     volumes:
       - mtalk-uploads:/app/uploads
     depends_on:
       postgres:
         condition: service_healthy
+    networks:
+      - default
+      - cnthudit_net
 
 volumes:
   mtalk-pg-data:
   mtalk-uploads:
+
+networks:
+  cnthudit_net:
+    external: true
+    name: cnthudit_default

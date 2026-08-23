@@ -10,8 +10,14 @@ const CntBulkPdf = (() => {
     let cancelled = false;
     let beforeUnloadHandler = null;
 
+    function cntMembersPath() {
+        const prefix = (window.HUDIT_CNT && window.HUDIT_CNT.apiPrefix) || "/cnt";
+        return `${prefix}/members`;
+    }
+
     function memberPdfUrl(userId) {
-        return `/api/hudit/cnt/members/${encodeURIComponent(userId)}/pdf`;
+        const base = (window.HUDIT_CNT && window.HUDIT_CNT.pdfApiBase) || "/api/hudit/cnt";
+        return `${base}/members/${encodeURIComponent(userId)}/pdf`;
     }
 
     function safeZipName(value, fallback) {
@@ -271,7 +277,7 @@ const CntBulkPdf = (() => {
             page: "1",
             size: "1"
         });
-        const data = await huditFetch(`/cnt/members?${params.toString()}`);
+        const data = await huditFetch(`${cntMembersPath()}?${params.toString()}`);
         return Number(data.total) || 0;
     }
 
@@ -292,7 +298,7 @@ const CntBulkPdf = (() => {
                 page: String(currentPage),
                 size: String(size)
             });
-            const data = await huditFetch(`/cnt/members?${params.toString()}`);
+            const data = await huditFetch(`${cntMembersPath()}?${params.toString()}`);
             members.push(...(data.items || []));
             totalPages = data.totalPages || 1;
             if (typeof onPageLoaded === "function") {

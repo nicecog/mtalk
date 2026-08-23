@@ -33,4 +33,25 @@ public class CntDataSourceConfig {
     ) {
         return new NamedParameterJdbcTemplate(dataSource);
     }
+
+    @Bean
+    @ConfigurationProperties("spring.datasource.cnt-hudit")
+    public DataSourceProperties cntHuditDataSourceProperties() {
+        return new DataSourceProperties();
+    }
+
+    @Bean
+    public DataSource cntHuditDataSource() {
+        return cntHuditDataSourceProperties()
+                .initializeDataSourceBuilder()
+                .type(HikariDataSource.class)
+                .build();
+    }
+
+    @Bean
+    public NamedParameterJdbcTemplate cntHuditJdbcTemplate(
+            @Qualifier("cntHuditDataSource") DataSource dataSource
+    ) {
+        return new NamedParameterJdbcTemplate(dataSource);
+    }
 }

@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CNT Cafe24 관리자 - HUDIT</title>
+    <link rel="stylesheet" href="/hudit/css/portal.css?v=13">
+</head>
+<body>
+<div class="hudit-shell">
+    <header class="hudit-topbar">
+        <div class="hudit-brand">
+            <a href="/hudit/dashboard" class="hudit-brand" style="text-decoration:none;color:inherit">
+                <div class="hudit-brand-mark">H</div>
+                <span>HUDIT · CNT Cafe24 관리자</span>
+            </a>
+        </div>
+        <div class="hudit-topbar-actions">
+            <a class="hudit-btn hudit-btn-secondary hudit-btn-sm" href="/hudit/dashboard">대시보드</a>
+            <button class="hudit-btn hudit-btn-secondary hudit-btn-sm" id="logout-btn" type="button">로그아웃</button>
+        </div>
+    </header>
+
+    <main class="hudit-main">
+        <h1 class="hudit-page-title">CNT Cafe24 관리자</h1>
+        <p class="hudit-page-subtitle">huditcnt.cafe24.com/cnthudit 직접 로그인용 아이디를 등록하고 비밀번호를 변경합니다. 계정은 Cafe24 MySQL에 저장됩니다.</p>
+
+        <div id="page-alert"></div>
+
+        <div class="hudit-card">
+            <div class="hudit-card-body">
+                <div class="hudit-toolbar">
+                    <div class="hudit-toolbar-meta">
+                        <strong>관리자 계정</strong>
+                        <span class="hudit-badge" id="admin-count">0명</span>
+                    </div>
+                    <button class="hudit-btn hudit-btn-primary" id="create-admin-btn" type="button">+ 관리자 등록</button>
+                </div>
+                <div class="hudit-table-wrap">
+                    <table class="hudit-table">
+                        <thead>
+                        <tr>
+                            <th>순번</th>
+                            <th>아이디</th>
+                            <th>이름</th>
+                            <th>상태</th>
+                            <th>등록</th>
+                            <th>최근 로그인</th>
+                            <th>작업</th>
+                        </tr>
+                        </thead>
+                        <tbody id="admins-tbody">
+                        <tr><td colspan="7" class="hudit-empty">불러오는 중...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<div class="hudit-modal-backdrop" id="admin-modal">
+    <div class="hudit-modal" role="dialog" aria-modal="true">
+        <div class="hudit-modal-header">
+            <h2 id="admin-modal-title">관리자 등록</h2>
+            <button class="hudit-btn hudit-btn-secondary hudit-btn-sm" id="admin-modal-close" type="button">닫기</button>
+        </div>
+        <div class="hudit-modal-body">
+            <div id="admin-modal-alert"></div>
+            <form id="admin-form">
+                <input type="hidden" id="edit-seq" value="">
+                <div class="hudit-form-group">
+                    <label class="hudit-label" for="form-login-id">아이디</label>
+                    <input class="hudit-input" id="form-login-id" required autocomplete="off">
+                </div>
+                <div class="hudit-form-group" id="password-group">
+                    <label class="hudit-label" for="form-password">비밀번호</label>
+                    <input class="hudit-input" id="form-password" type="password" autocomplete="new-password">
+                </div>
+                <div class="hudit-form-group">
+                    <label class="hudit-label" for="form-display-name">표시 이름</label>
+                    <input class="hudit-input" id="form-display-name">
+                </div>
+                <div class="hudit-form-group hudit-hidden" id="enabled-group">
+                    <label class="hudit-label">사용 여부</label>
+                    <div class="hudit-radio-group">
+                        <label><input type="radio" name="form-enabled" value="1" checked> 사용</label>
+                        <label><input type="radio" name="form-enabled" value="0"> 중지</label>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="hudit-modal-footer">
+            <button class="hudit-btn hudit-btn-secondary" id="admin-modal-cancel" type="button">취소</button>
+            <button class="hudit-btn hudit-btn-primary" id="admin-modal-save" type="button">저장</button>
+        </div>
+    </div>
+</div>
+
+<div class="hudit-modal-backdrop" id="reset-modal">
+    <div class="hudit-modal" role="dialog" aria-modal="true">
+        <div class="hudit-modal-header">
+            <h2>비밀번호 변경</h2>
+            <button class="hudit-btn hudit-btn-secondary hudit-btn-sm" id="reset-close" type="button">닫기</button>
+        </div>
+        <div class="hudit-modal-body">
+            <p id="reset-message">비밀번호를 변경합니다.</p>
+            <div id="reset-form" class="hudit-form-group">
+                <label class="hudit-label" for="reset-password">새 비밀번호</label>
+                <div style="display:flex;gap:0.5rem;align-items:center">
+                    <input class="hudit-input" id="reset-password" type="text" placeholder="비워두면 랜덤 생성" autocomplete="new-password">
+                    <button class="hudit-btn hudit-btn-secondary hudit-btn-sm" id="reset-random" type="button">랜덤 생성</button>
+                </div>
+                <small style="color:var(--hudit-muted);font-size:0.82rem;display:block;margin-top:0.35rem">
+                    직접 입력하거나 비우면 12자리 임시 비밀번호가 만들어집니다.
+                </small>
+            </div>
+            <div id="reset-result" class="hudit-hidden">
+                <div class="hudit-alert hudit-alert-info">
+                    적용된 비밀번호: <strong id="temp-password"></strong>
+                </div>
+                <p style="color:#646970;font-size:0.9rem">운영자에게 안전한 방법으로 전달해 주세요.</p>
+            </div>
+        </div>
+        <div class="hudit-modal-footer">
+            <button class="hudit-btn hudit-btn-secondary" id="reset-cancel" type="button">닫기</button>
+            <button class="hudit-btn hudit-btn-danger" id="reset-confirm" type="button">변경</button>
+        </div>
+    </div>
+</div>
+
+<script src="/hudit/js/portal.js"></script>
+<script>
+const RESET_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789!@#";
+let admins = [];
+let resetTargetSeq = null;
+
+function generateRandomPassword() {
+    let value = "";
+    for (let i = 0; i < 12; i++) {
+        value += RESET_CHARS.charAt(Math.floor(Math.random() * RESET_CHARS.length));
+    }
+    return value;
+}
+
+function setModalOpen(id, open) {
+    const el = document.getElementById(id);
+    el.classList.toggle("open", open);
+}
+
+function renderAdmins() {
+    const tbody = document.getElementById("admins-tbody");
+    document.getElementById("admin-count").textContent = `${admins.length}명`;
+    if (!admins.length) {
+        tbody.innerHTML = `<tr><td colspan="7" class="hudit-empty">등록된 관리자가 없습니다.</td></tr>`;
+        return;
+    }
+    tbody.innerHTML = admins.map(admin => `
+        <tr>
+            <td>${admin.seq}</td>
+            <td>${escapeHtml(admin.loginId)}</td>
+            <td>${escapeHtml(admin.displayName)}</td>
+            <td>${admin.enabled ? "사용" : "중지"}</td>
+            <td>${formatDate(admin.createdAt)}</td>
+            <td>${formatDate(admin.lastLoginAt)}</td>
+            <td>
+                <button class="hudit-btn hudit-btn-secondary hudit-btn-xs" data-action="edit" data-seq="${admin.seq}" type="button">수정</button>
+                <button class="hudit-btn hudit-btn-danger hudit-btn-xs" data-action="reset" data-seq="${admin.seq}" data-id="${escapeHtml(admin.loginId)}" type="button">PW</button>
+            </td>
+        </tr>
+    `).join("");
+}
+
+async function loadAdmins() {
+    admins = await huditFetch("/cnt-cafe24/admins");
+    renderAdmins();
+}
+
+function openCreate() {
+    document.getElementById("admin-modal-title").textContent = "관리자 등록";
+    document.getElementById("edit-seq").value = "";
+    document.getElementById("form-login-id").value = "";
+    document.getElementById("form-login-id").disabled = false;
+    document.getElementById("form-password").value = "";
+    document.getElementById("password-group").classList.remove("hudit-hidden");
+    document.getElementById("form-password").required = true;
+    document.getElementById("form-display-name").value = "";
+    document.getElementById("enabled-group").classList.add("hudit-hidden");
+    clearAlert(document.getElementById("admin-modal-alert"));
+    setModalOpen("admin-modal", true);
+}
+
+function openEdit(seq) {
+    const admin = admins.find(item => item.seq === seq);
+    if (!admin) {
+        return;
+    }
+    document.getElementById("admin-modal-title").textContent = "관리자 수정";
+    document.getElementById("edit-seq").value = String(admin.seq);
+    document.getElementById("form-login-id").value = admin.loginId;
+    document.getElementById("form-login-id").disabled = true;
+    document.getElementById("form-password").value = "";
+    document.getElementById("password-group").classList.add("hudit-hidden");
+    document.getElementById("form-password").required = false;
+    document.getElementById("form-display-name").value = admin.displayName || "";
+    document.getElementById("enabled-group").classList.remove("hudit-hidden");
+    document.querySelector(`input[name="form-enabled"][value="${admin.enabled ? "1" : "0"}"]`).checked = true;
+    clearAlert(document.getElementById("admin-modal-alert"));
+    setModalOpen("admin-modal", true);
+}
+
+async function saveAdmin() {
+    const alertBox = document.getElementById("admin-modal-alert");
+    clearAlert(alertBox);
+    const seq = document.getElementById("edit-seq").value;
+    const loginId = document.getElementById("form-login-id").value.trim();
+    const password = document.getElementById("form-password").value;
+    const displayName = document.getElementById("form-display-name").value.trim();
+    try {
+        if (seq) {
+            const enabled = document.querySelector("input[name='form-enabled']:checked").value === "1";
+            await huditFetch(`/cnt-cafe24/admins/${seq}`, {
+                method: "PUT",
+                body: JSON.stringify({ displayName, enabled })
+            });
+        } else {
+            if (!password || password.length < 4) {
+                showAlert(alertBox, "비밀번호는 4자 이상이어야 합니다.");
+                return;
+            }
+            await huditFetch("/cnt-cafe24/admins", {
+                method: "POST",
+                body: JSON.stringify({ loginId, password, displayName })
+            });
+        }
+        setModalOpen("admin-modal", false);
+        await loadAdmins();
+        showAlert(document.getElementById("page-alert"), "저장했습니다.", "success");
+    } catch (error) {
+        showAlert(alertBox, error.message);
+    }
+}
+
+function openReset(seq, loginId) {
+    resetTargetSeq = seq;
+    document.getElementById("reset-message").textContent = `"${loginId}" 계정의 비밀번호를 변경합니다.`;
+    document.getElementById("reset-password").value = "";
+    document.getElementById("reset-form").classList.remove("hudit-hidden");
+    document.getElementById("reset-result").classList.add("hudit-hidden");
+    document.getElementById("reset-confirm").classList.remove("hudit-hidden");
+    setModalOpen("reset-modal", true);
+}
+
+async function confirmReset() {
+    const customPassword = document.getElementById("reset-password").value.trim();
+    if (customPassword && customPassword.length < 4) {
+        showAlert(document.getElementById("page-alert"), "비밀번호는 4자 이상이어야 합니다.");
+        return;
+    }
+    const result = await huditFetch(`/cnt-cafe24/admins/${resetTargetSeq}/reset-password`, {
+        method: "POST",
+        body: JSON.stringify({ password: customPassword || null })
+    });
+    document.getElementById("temp-password").textContent = result.tempPassword;
+    document.getElementById("reset-form").classList.add("hudit-hidden");
+    document.getElementById("reset-result").classList.remove("hudit-hidden");
+    document.getElementById("reset-confirm").classList.add("hudit-hidden");
+}
+
+document.addEventListener("DOMContentLoaded", async () => {
+    const session = await requireAuth();
+    if (!session) return;
+
+    document.getElementById("create-admin-btn").addEventListener("click", openCreate);
+    document.getElementById("admin-modal-close").addEventListener("click", () => setModalOpen("admin-modal", false));
+    document.getElementById("admin-modal-cancel").addEventListener("click", () => setModalOpen("admin-modal", false));
+    document.getElementById("admin-modal-save").addEventListener("click", saveAdmin);
+    document.getElementById("reset-close").addEventListener("click", () => setModalOpen("reset-modal", false));
+    document.getElementById("reset-cancel").addEventListener("click", () => setModalOpen("reset-modal", false));
+    document.getElementById("reset-confirm").addEventListener("click", async () => {
+        try {
+            await confirmReset();
+        } catch (error) {
+            showAlert(document.getElementById("page-alert"), error.message);
+        }
+    });
+    document.getElementById("reset-random").addEventListener("click", () => {
+        document.getElementById("reset-password").value = generateRandomPassword();
+    });
+    document.getElementById("admins-tbody").addEventListener("click", (event) => {
+        const button = event.target.closest("button[data-action]");
+        if (!button) {
+            return;
+        }
+        const seq = Number(button.dataset.seq);
+        if (button.dataset.action === "edit") {
+            openEdit(seq);
+        } else if (button.dataset.action === "reset") {
+            openReset(seq, button.dataset.id);
+        }
+    });
+
+    try {
+        await loadAdmins();
+    } catch (error) {
+        showAlert(document.getElementById("page-alert"), error.message);
+    }
+});
+</script>
+</body>
+</html>

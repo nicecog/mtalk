@@ -9,7 +9,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-@RestControllerAdvice(basePackages = "com.mtalk.portal")
+@RestControllerAdvice(basePackages = {"com.mtalk.portal", "com.mtalk.cnthudit"})
 public class PortalApiExceptionHandler {
 
     @ExceptionHandler(ResponseStatusException.class)

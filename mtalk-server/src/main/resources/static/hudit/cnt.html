@@ -118,12 +118,14 @@
                                     <th>No</th>
                                     <th>User ID</th>
                                     <th>Name</th>
+                                    <th>성별</th>
+                                    <th>생년월일</th>
                                     <th>Age</th>
                                     <th>소속 기관</th>
                                 </tr>
                                 </thead>
                                 <tbody id="analysis-member-summary">
-                                <tr><td colspan="5" class="hudit-empty">불러오는 중...</td></tr>
+                                <tr><td colspan="7" class="hudit-empty">불러오는 중...</td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -283,6 +285,12 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script src="/hudit/js/portal.js"></script>
+<script>
+window.HUDIT_CNT = {
+    apiPrefix: "/cnt",
+    pdfApiBase: "/api/hudit/cnt"
+};
+</script>
 <script src="/hudit/js/cnt-bulk-pdf.js"></script>
 <script>
 const CENTER_SORTS = [
@@ -610,6 +618,17 @@ async function loadMemberAnalysis() {
     renderMemberAnalysis(data);
 }
 
+function formatMemberGender(value) {
+    const gender = String(value || "").trim().toUpperCase();
+    if (gender === "M") {
+        return "남성";
+    }
+    if (gender === "F") {
+        return "여성";
+    }
+    return value || "-";
+}
+
 function renderMemberAnalysis(data) {
     const member = data.member;
     document.getElementById("analysis-member-title").textContent = `${member.userName || member.userId} 분석`;
@@ -625,6 +644,8 @@ function renderMemberAnalysis(data) {
             <td>${member.no}</td>
             <td><strong>${escapeHtml(member.userId)}</strong></td>
             <td>${escapeHtml(member.userName || "-")}</td>
+            <td>${escapeHtml(formatMemberGender(member.userGender))}</td>
+            <td>${escapeHtml(member.birthday || "-")}</td>
             <td>${member.userAge}</td>
             <td>${escapeHtml(member.centerNm || "-")}</td>
         </tr>

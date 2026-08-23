@@ -35,7 +35,7 @@
 
         <div class="dash-stats">
             <div class="dash-stat">
-                <span class="dash-stat-num">2</span>
+                <span class="dash-stat-num">3</span>
                 <span class="dash-stat-label">활성 서비스</span>
             </div>
             <div class="dash-stat">
@@ -90,13 +90,41 @@
                 </div>
             </article>
 
-            <article class="dash-coming">
-                <div class="dash-coming-icon" aria-hidden="true">＋</div>
-                <div>
-                    <h3>추가 예정</h3>
-                    <p>새로운 HUDIT 건강 케어 서비스가 곧 이곳에 추가됩니다.</p>
+            <article class="dash-feature" id="cnt-cafe24-card" tabindex="0" role="link" aria-label="CNT Cafe24 관리">
+                <div class="dash-feature-visual" style="background:linear-gradient(145deg,#eef5ff,#e8f0fb)">
+                    <div class="dash-feature-icon">🧪</div>
+                    <div class="dash-service-tags">
+                        <span>Cafe24</span>
+                        <span>센터</span>
+                        <span>멤버</span>
+                    </div>
                 </div>
-                <span class="hudit-badge hudit-badge--muted">준비 중</span>
+                <div class="dash-feature-body">
+                    <div class="dash-feature-head">
+                        <h3>CNT Cafe24</h3>
+                        <span class="hudit-badge">활성</span>
+                    </div>
+                    <p>huditcnt.cafe24.com에서 센터·회원을 조회하고 센터·회원 생성을 처리하며, 분석 데이터와 PDF를 연동합니다.</p>
+                    <span class="dash-feature-link">관리하기 →</span>
+                </div>
+            </article>
+
+            <article class="dash-feature" id="cnt-cafe24-admins-card" tabindex="0" role="link" aria-label="CNT Cafe24 관리자">
+                <div class="dash-feature-visual" style="background:linear-gradient(145deg,#fff6e8,#f7efe4)">
+                    <div class="dash-feature-icon">🔑</div>
+                    <div class="dash-service-tags">
+                        <span>아이디</span>
+                        <span>비밀번호</span>
+                    </div>
+                </div>
+                <div class="dash-feature-body">
+                    <div class="dash-feature-head">
+                        <h3>CNT Cafe24 관리자</h3>
+                        <span class="hudit-badge">활성</span>
+                    </div>
+                    <p>huditcnt.cafe24.com/cnthudit 로그인용 관리자 아이디를 등록하고 비밀번호를 변경합니다.</p>
+                    <span class="dash-feature-link">계정 관리 →</span>
+                </div>
             </article>
         </section>
     </main>
@@ -128,6 +156,33 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (event.key === "Enter" || event.key === " ") {
             event.preventDefault();
             goCnt();
+        }
+    });
+
+    const cntCafe24Card = document.getElementById("cnt-cafe24-card");
+    const goCntCafe24 = async () => {
+        try {
+            const data = await huditFetch("/cnt-cafe24/entry-ticket", { method: "POST" });
+            window.location.href = data.redirectUrl;
+        } catch (error) {
+            window.alert(error.message || "CNT Cafe24 입장에 실패했습니다.");
+        }
+    };
+    cntCafe24Card.addEventListener("click", goCntCafe24);
+    cntCafe24Card.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            goCntCafe24();
+        }
+    });
+
+    const cntCafe24AdminsCard = document.getElementById("cnt-cafe24-admins-card");
+    const goCntCafe24Admins = () => { window.location.href = "/hudit/cnt-cafe24-admins"; };
+    cntCafe24AdminsCard.addEventListener("click", goCntCafe24Admins);
+    cntCafe24AdminsCard.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            goCntCafe24Admins();
         }
     });
 });

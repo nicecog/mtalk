@@ -10,15 +10,13 @@ import com.mtalk.portal.dto.PortalCntMemberAnalysisResponse.PortalCntMemberDetai
 import com.mtalk.portal.dto.PortalCntMemberResponse;
 import com.mtalk.portal.dto.PortalCntPageResponse;
 import com.mtalk.portal.dto.PortalCntUpdateCenterRequest;
+import com.mtalk.portal.dto.PortalCntUpdateMemberRequest;
 import jakarta.servlet.http.HttpSession;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
@@ -26,14 +24,16 @@ import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Period;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-@Service
 public class PortalCntService {
 
     private static final Set<String> CENTER_SORTS = Set.of("no", "centerId", "centerNm", "auditDt");
@@ -60,11 +60,12 @@ public class PortalCntService {
     private final PortalAuthService portalAuthService;
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
     private final String legacyBaseUrl;
+    private volatile Boolean birthdayColumnPresent;
 
     public PortalCntService(
-            @Qualifier("cntJdbcTemplate") NamedParameterJdbcTemplate cntJdbcTemplate,
+            NamedParameterJdbcTemplate cntJdbcTemplate,
             PortalAuthService portalAuthService,
-            @Value("${hudit.cnt.legacy-base-url:http://cnt.re.kr}") String legacyBaseUrl
+            String legacyBaseUrl
     ) {
         this.cntJdbcTemplate = cntJdbcTemplate;
         this.portalAuthService = portalAuthService;
@@ -73,6 +74,10 @@ public class PortalCntService {
 
     public PortalCntConfigResponse getConfig(HttpSession session) {
         portalAuthService.requirePortalAdmin(session);
+        return getConfig();
+    }
+
+    public PortalCntConfigResponse getConfig() {
         String base = legacyBaseUrl;
         return new PortalCntConfigResponse(
                 base,
@@ -91,6 +96,15 @@ public class PortalCntService {
             HttpSession session
     ) {
         portalAuthService.requirePortalAdmin(session);
+        return listCenters(sort, order, page, size);
+    }
+
+    public PortalCntPageResponse<PortalCntCenterResponse> listCenters(
+            String sort,
+            String order,
+            int page,
+            int size
+    ) {
         String sortColumn = resolveSort(sort, CENTER_SORTS, CENTER_SORT_COLUMNS, "no");
         String sortOrder = resolveOrder(order);
         int pageSize = resolvePageSize(size);
@@ -117,6 +131,10 @@ public class PortalCntService {
 
     public PortalCntCenterResponse getCenter(long no, HttpSession session) {
         portalAuthService.requirePortalAdmin(session);
+        return getCenter(no);
+    }
+
+    public PortalCntCenterResponse getCenter(long no) {
         List<PortalCntCenterResponse> rows = cntJdbcTemplate.query(
                 """
                 SELECT no, center_id, center_nm, open_yn, max_session, audit_dt
@@ -138,7 +156,10 @@ public class PortalCntService {
             HttpSession session
     ) {
         portalAuthService.requirePortalAdmin(session);
+        return createCenter(request);
+    }
 
+    public PortalCntCenterResponse createCenter(PortalCntCreateCenterRequest request) {
         String centerId = request.centerId().trim();
         String centerNm = request.centerNm() == null ? "" : request.centerNm().trim();
         String openYn = request.openYn() == null || request.openYn().isBlank()
@@ -194,7 +215,11 @@ public class PortalCntService {
 
     public PortalCntCenterResponse updateCenter(long no, PortalCntUpdateCenterRequest request, HttpSession session) {
         portalAuthService.requirePortalAdmin(session);
-        getCenter(no, session);
+        return updateCenter(no, request);
+    }
+
+    public PortalCntCenterResponse updateCenter(long no, PortalCntUpdateCenterRequest request) {
+        getCenter(no);
         String centerNm = request.centerNm().trim();
         String openYn = request.openYn() == null || request.openYn().isBlank()
                 ? "Y"
@@ -218,12 +243,16 @@ public class PortalCntService {
                         .addValue("maxSession", maxSession)
                         .addValue("auditDt", Timestamp.valueOf(LocalDateTime.now()))
         );
-        return getCenter(no, session);
+        return getCenter(no);
     }
 
     public PortalCntCreateMembersResponse createCenterMembers(long no, int count, HttpSession session) {
         portalAuthService.requirePortalAdmin(session);
-        PortalCntCenterResponse center = getCenter(no, session);
+        return createCenterMembers(no, count);
+    }
+
+    public PortalCntCreateMembersResponse createCenterMembers(long no, int count) {
+        PortalCntCenterResponse center = getCenter(no);
         String centerId = center.centerId();
 
         Integer maxUserId = cntJdbcTemplate.queryForObject(
@@ -275,6 +304,16 @@ public class PortalCntService {
             HttpSession session
     ) {
         portalAuthService.requirePortalAdmin(session);
+        return listMembers(sort, order, page, size, centerId);
+    }
+
+    public PortalCntPageResponse<PortalCntMemberResponse> listMembers(
+            String sort,
+            String order,
+            int page,
+            int size,
+            String centerId
+    ) {
         String sortColumn = resolveSort(sort, MEMBER_SORTS, MEMBER_SORT_COLUMNS, "no");
         String sortOrder = resolveOrder(order);
         int pageSize = resolvePageSize(size);
@@ -322,8 +361,114 @@ public class PortalCntService {
         return new PortalCntPageResponse<>(items, total, pageNumber, pageSize, totalPages(total, pageSize));
     }
 
+    public PortalCntMemberDetail getMember(String userId) {
+        if (userId == null || userId.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "userId가 필요합니다.");
+        }
+        return loadMemberDetail(userId.trim());
+    }
+
+    public PortalCntMemberDetail updateMember(String userId, PortalCntUpdateMemberRequest request) {
+        PortalCntMemberDetail current = getMember(userId);
+        String userName = request.userName().trim();
+        if (userName.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "이름을 입력해 주세요.");
+        }
+        String userGender = request.userGender().trim().toUpperCase();
+        if (!userGender.equals("M") && !userGender.equals("F")) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "성별은 M 또는 F여야 합니다.");
+        }
+        LocalDate birthday = parseBirthday(request.birthday());
+        int userAge = Period.between(birthday, LocalDate.now()).getYears();
+
+        boolean includeBirthday = birthdayColumnPresent == null || Boolean.TRUE.equals(birthdayColumnPresent);
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("userId", current.userId())
+                .addValue("userName", userName)
+                .addValue("userGender", userGender)
+                .addValue("userAge", userAge)
+                .addValue("birthday", birthday.toString());
+        try {
+            int updated = cntJdbcTemplate.update(includeBirthday
+                    ? """
+                    UPDATE cnt_member
+                    SET user_name = :userName,
+                        user_gender = :userGender,
+                        user_age = :userAge,
+                        birthday = :birthday
+                    WHERE user_id = :userId
+                    """
+                    : """
+                    UPDATE cnt_member
+                    SET user_name = :userName,
+                        user_gender = :userGender,
+                        user_age = :userAge
+                    WHERE user_id = :userId
+                    """,
+                    params);
+            if (includeBirthday) {
+                birthdayColumnPresent = true;
+            }
+            if (updated == 0) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "멤버를 찾을 수 없습니다.");
+            }
+        } catch (org.springframework.dao.DataAccessException ex) {
+            if (includeBirthday && isMissingBirthdayColumn(ex)) {
+                birthdayColumnPresent = false;
+                cntJdbcTemplate.update(
+                        """
+                        UPDATE cnt_member
+                        SET user_name = :userName,
+                            user_gender = :userGender,
+                            user_age = :userAge
+                        WHERE user_id = :userId
+                        """,
+                        params
+                );
+            } else {
+                throw ex;
+            }
+        }
+        return loadMemberDetail(current.userId());
+    }
+
+    private boolean isMissingBirthdayColumn(Throwable ex) {
+        StringBuilder message = new StringBuilder();
+        Throwable cursor = ex;
+        while (cursor != null) {
+            if (cursor.getMessage() != null) {
+                message.append(cursor.getMessage()).append(' ');
+            }
+            cursor = cursor.getCause();
+        }
+        String lower = message.toString().toLowerCase();
+        return lower.contains("unknown column") && lower.contains("birthday");
+    }
+
+    private LocalDate parseBirthday(String raw) {
+        if (raw == null || raw.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "생년월일을 입력해 주세요.");
+        }
+        String value = raw.trim();
+        try {
+            LocalDate birthday = value.matches("\\d{8}")
+                    ? LocalDate.parse(value, DateTimeFormatter.BASIC_ISO_DATE)
+                    : LocalDate.parse(value, DateTimeFormatter.ISO_LOCAL_DATE);
+            if (birthday.isAfter(LocalDate.now()) || birthday.isBefore(LocalDate.of(1900, 1, 1))) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "생년월일이 올바르지 않습니다.");
+            }
+            return birthday;
+        } catch (DateTimeParseException ex) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "생년월일 형식이 올바르지 않습니다.");
+        }
+    }
+
     public PortalCntMemberAnalysisResponse getMemberAnalysis(String userId, HttpSession session) {
         portalAuthService.requirePortalAdmin(session);
+        return getMemberAnalysis(userId);
+    }
+
+    public PortalCntMemberAnalysisResponse getMemberAnalysis(String userId) {
         if (userId == null || userId.isBlank()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "userId가 필요합니다.");
         }
@@ -339,19 +484,40 @@ public class PortalCntService {
     }
 
     private PortalCntMemberDetail loadMemberDetail(String userId) {
+        boolean includeBirthday = birthdayColumnPresent == null || Boolean.TRUE.equals(birthdayColumnPresent);
+        try {
+            PortalCntMemberDetail member = queryMemberDetail(userId, includeBirthday);
+            if (includeBirthday) {
+                birthdayColumnPresent = true;
+            }
+            return member;
+        } catch (org.springframework.dao.DataAccessException ex) {
+            if (includeBirthday && isMissingBirthdayColumn(ex)) {
+                birthdayColumnPresent = false;
+                return queryMemberDetail(userId, false);
+            }
+            throw ex;
+        }
+    }
+
+    private PortalCntMemberDetail queryMemberDetail(String userId, boolean includeBirthday) {
+        String birthdaySelect = includeBirthday ? ", m.birthday" : "";
         List<PortalCntMemberDetail> rows = cntJdbcTemplate.query(
                 """
-                SELECT m.no, m.user_id, m.user_name, m.user_age, m.center_id, c.center_nm
+                SELECT m.no, m.user_id, m.user_name, m.user_age, m.user_gender, m.center_id, c.center_nm
+                %s
                 FROM cnt_member m
                 LEFT JOIN cnt_center c ON m.center_id = c.center_id
                 WHERE m.user_id = :userId
-                """,
+                """.formatted(birthdaySelect),
                 new MapSqlParameterSource("userId", userId),
                 (rs, rowNum) -> new PortalCntMemberDetail(
                         rs.getLong("no"),
                         rs.getString("user_id"),
                         rs.getString("user_name"),
                         rs.getInt("user_age"),
+                        rs.getString("user_gender"),
+                        includeBirthday ? formatBirthdayValue(rs.getObject("birthday")) : null,
                         rs.getString("center_id"),
                         rs.getString("center_nm")
                 )
@@ -360,6 +526,20 @@ public class PortalCntService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "멤버를 찾을 수 없습니다.");
         }
         return rows.getFirst();
+    }
+
+    private String formatBirthdayValue(Object value) {
+        if (value == null) {
+            return null;
+        }
+        if (value instanceof Date date) {
+            return date.toLocalDate().toString();
+        }
+        if (value instanceof LocalDate localDate) {
+            return localDate.toString();
+        }
+        String text = value.toString().trim();
+        return text.isEmpty() || "null".equalsIgnoreCase(text) ? null : text.length() >= 10 ? text.substring(0, 10) : text;
     }
 
     private PortalCntAnalysisSection buildEmotionSection(String userId) {
@@ -623,7 +803,7 @@ public class PortalCntService {
 
     private String trimTrailingSlash(String url) {
         if (url == null || url.isBlank()) {
-            return "http://cnt.re.kr";
+            throw new IllegalStateException("CNT backend base URL이 비어 있습니다.");
         }
         return url.endsWith("/") ? url.substring(0, url.length() - 1) : url;
     }

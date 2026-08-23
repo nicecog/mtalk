@@ -16,10 +16,19 @@ spring:
       url: jdbc:mysql://${CNT_DB_HOST:db.cnt.re.kr}:${CNT_DB_PORT:3306}/${CNT_DB_NAME:dbhuditcnt}?characterEncoding=utf8&useSSL=false&allowPublicKeyRetrieval=true
       username: ${CNT_DB_USER}
       password: ${CNT_DB_PASSWORD}
+    cnt-hudit:
+      url: jdbc:mysql://${CNT_HUDIT_DB_HOST:huditcnt.cafe24.com}:${CNT_HUDIT_DB_PORT:3306}/${CNT_HUDIT_DB_NAME:dbhuditcnt}?characterEncoding=utf8&useSSL=false&allowPublicKeyRetrieval=true
+      username: ${CNT_HUDIT_DB_USER:huditcnt}
+      password: ${CNT_HUDIT_DB_PASSWORD:}
 
 hudit:
   cnt:
     legacy-base-url: ${CNT_LEGACY_BASE_URL:http://cnt.re.kr}
+    hudit-base-url: ${CNT_HUDIT_BASE_URL:http://huditcnt.cafe24.com}
+    hudit-internal-base-url: ${CNT_HUDIT_INTERNAL_BASE_URL:http://huditcnt.cafe24.com}
+    hudit-pdf-template-suffix: ${CNT_HUDIT_PDF_TEMPLATE_SUFFIX:pdf}
+    cnthudit-public-base-url: ${CNTHUDIT_PUBLIC_BASE_URL:https://huditcnt.cafe24.com}
+    entry-ticket-secret: ${CNTHUDIT_ENTRY_TICKET_SECRET:}
 
 mbench:
   upload-dir: ${MBENCH_UPLOAD_DIR:/app/uploads/mbench}

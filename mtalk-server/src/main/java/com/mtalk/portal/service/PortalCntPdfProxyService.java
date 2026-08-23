@@ -1,14 +1,12 @@
 package com.mtalk.portal.service;
 
 import jakarta.servlet.http.HttpSession;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
@@ -19,10 +17,7 @@ import java.time.Duration;
 import java.util.Locale;
 import java.util.Set;
 
-@Service
 public class PortalCntPdfProxyService {
-
-    public static final String ASSET_PROXY_PREFIX = "/api/hudit/cnt/pdf-assets";
 
     private static final int MIN_HTML_LENGTH = 200;
     private static final Set<String> ALLOWED_ASSET_PREFIXES = Set.of(
@@ -56,16 +51,21 @@ public class PortalCntPdfProxyService {
     private final RestTemplate cntPdfRestTemplate;
     private final String legacyBaseUrl;
     private final String pdfTemplateSuffix;
+    private final String assetProxyPrefix;
 
     public PortalCntPdfProxyService(
             PortalAuthService portalAuthService,
-            @Value("${hudit.cnt.legacy-base-url:http://cnt.re.kr}") String legacyBaseUrl,
-            @Value("${hudit.cnt.pdf-template-suffix:pdf4th}") String pdfTemplateSuffix,
-            @Value("${hudit.cnt.pdf-fetch-timeout-ms:45000}") long pdfFetchTimeoutMs
+            String legacyBaseUrl,
+            String pdfTemplateSuffix,
+            String assetProxyPrefix,
+            long pdfFetchTimeoutMs
     ) {
         this.portalAuthService = portalAuthService;
         this.legacyBaseUrl = trimTrailingSlash(legacyBaseUrl);
         this.pdfTemplateSuffix = normalizeTemplateSuffix(pdfTemplateSuffix);
+        this.assetProxyPrefix = assetProxyPrefix.endsWith("/")
+                ? assetProxyPrefix.substring(0, assetProxyPrefix.length() - 1)
+                : assetProxyPrefix;
         var factory = new org.springframework.http.client.SimpleClientHttpRequestFactory();
         factory.setConnectTimeout((int) Duration.ofMillis(pdfFetchTimeoutMs).toMillis());
         factory.setReadTimeout((int) Duration.ofMillis(pdfFetchTimeoutMs).toMillis());
@@ -74,6 +74,10 @@ public class PortalCntPdfProxyService {
 
     public ResponseEntity<byte[]> proxyMemberPdf(String userId, boolean autoDownload, HttpSession session) {
         portalAuthService.requirePortalAdmin(session);
+        return proxyMemberPdf(userId, autoDownload);
+    }
+
+    public ResponseEntity<byte[]> proxyMemberPdf(String userId, boolean autoDownload) {
         if (userId == null || userId.isBlank()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "userId가 필요합니다.");
         }
@@ -96,6 +100,10 @@ public class PortalCntPdfProxyService {
 
     public ResponseEntity<byte[]> proxyPdfAsset(String assetPath, HttpSession session) {
         portalAuthService.requirePortalAdmin(session);
+        return proxyPdfAsset(assetPath);
+    }
+
+    public ResponseEntity<byte[]> proxyPdfAsset(String assetPath) {
         String normalizedPath = normalizeAssetPath(assetPath);
         String sourceUrl = legacyBaseUrl + normalizedPath;
         try {
@@ -138,11 +146,11 @@ public class PortalCntPdfProxyService {
         headers.set(HttpHeaders.ACCEPT, "text/html;charset=UTF-8");
         HttpEntity<Void> entity = new HttpEntity<>(headers);
         try {
-            ResponseEntity<String> response = cntPdfRestTemplate.exchange(
+            ResponseEntity<byte[]> response = cntPdfRestTemplate.exchange(
                     sourceUrl,
                     HttpMethod.GET,
                     entity,
-                    String.class
+                    byte[].class
             );
             if (!response.getStatusCode().is2xxSuccessful()) {
                 throw new ResponseStatusException(
@@ -150,7 +158,8 @@ public class PortalCntPdfProxyService {
                         "CNT PDF 화면 조회 실패 (HTTP " + response.getStatusCode().value() + ")"
                 );
             }
-            String html = response.getBody() != null ? response.getBody() : "";
+            byte[] body = response.getBody() != null ? response.getBody() : new byte[0];
+            String html = new String(body, StandardCharsets.UTF_8);
             if (html.trim().length() < MIN_HTML_LENGTH) {
                 throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "CNT PDF HTML 응답이 비어 있습니다.");
             }
@@ -165,7 +174,7 @@ public class PortalCntPdfProxyService {
     }
 
     private String rewriteHtmlForProxy(String html, String userId, boolean autoDownload) {
-        String proxy = ASSET_PROXY_PREFIX;
+        String proxy = assetProxyPrefix;
         String rewritten = html
                 .replace("href=\"/", "href=\"" + proxy + "/")
                 .replace("src=\"/", "src=\"" + proxy + "/")
@@ -185,9 +194,9 @@ public class PortalCntPdfProxyService {
             return text;
         }
         return text
-                .replace("url(../", "url(" + ASSET_PROXY_PREFIX + "/")
-                .replace("url('../", "url('" + ASSET_PROXY_PREFIX + "/")
-                .replace("url(\"../", "url(\"" + ASSET_PROXY_PREFIX + "/");
+                .replace("url(../", "url(" + assetProxyPrefix + "/")
+                .replace("url('../", "url('" + assetProxyPrefix + "/")
+                .replace("url(\"../", "url(\"" + assetProxyPrefix + "/");
     }
 
     private String normalizeAssetPath(String assetPath) {
@@ -259,7 +268,7 @@ public class PortalCntPdfProxyService {
 
     private String trimTrailingSlash(String url) {
         if (url == null || url.isBlank()) {
-            return "http://cnt.re.kr";
+            throw new IllegalStateException("CNT backend base URL이 비어 있습니다.");
         }
         return url.endsWith("/") ? url.substring(0, url.length() - 1) : url;
     }

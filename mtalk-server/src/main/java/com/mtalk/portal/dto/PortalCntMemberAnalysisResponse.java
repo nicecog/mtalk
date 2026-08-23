@@ -11,6 +11,8 @@ public record PortalCntMemberAnalysisResponse(
             String userId,
             String userName,
             int userAge,
+            String userGender,
+            String birthday,
             String centerId,
             String centerNm
     ) {
