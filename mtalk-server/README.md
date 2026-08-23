@@ -282,4 +282,20 @@ mtalk/
 
 두 DB는 동일 PostgreSQL 인스턴스에서 분리 운영됩니다.
 
+## Git / 버전 관리
+
+`mtalk-server`는 상위 저장소 [`nicecog/mtalk`](https://github.com/nicecog/mtalk)의 `mtalk-server/` 경로로 관리됩니다.
+
+```powershell
+cd C:\project\mtalk
+git status mtalk-server/
+```
+
+| 항목 | 설명 |
+|------|------|
+| 추적 대상 | `src/`, `pom.xml`, `Dockerfile`, `docker-compose.prod.yml`, `deploy/`, `scripts/`, `docs/` |
+| 제외 (`.gitignore`) | `target/`, `.env`, `.env.*`, `data/`, `uploads/`, `*.log` |
+| 환경변수 템플릿 | `.env.example` → 복사 후 `.env.cafe24`, `.env.huditcnt-vps` 등으로 사용 |
+
+민감 정보(비밀번호, JWT 시크릿, SSH 키)는 **절대 커밋하지 마세요**.
 
