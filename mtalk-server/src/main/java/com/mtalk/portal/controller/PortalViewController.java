@@ -35,4 +35,9 @@ public class PortalViewController {
     public String cntCafe24AdminsPage() {
         return "forward:/hudit/cnt-cafe24-admins.html";
     }
+
+    @GetMapping("/hudit/projects")
+    public String projectsPage() {
+        return "forward:/hudit/projects.html";
+    }
 }

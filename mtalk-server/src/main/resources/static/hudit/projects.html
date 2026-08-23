@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>휴딧 프로젝트 관리 - HUDIT</title>
+    <link rel="stylesheet" href="/hudit/css/portal.css?v=14">
+</head>
+<body>
+<div class="hudit-shell">
+    <header class="hudit-topbar">
+        <div class="hudit-brand">
+            <a href="/hudit/dashboard" class="hudit-brand" style="text-decoration:none;color:inherit">
+                <div class="hudit-brand-mark">H</div>
+                <span>HUDIT · 프로젝트 관리</span>
+            </a>
+        </div>
+        <div class="hudit-topbar-actions">
+            <a class="hudit-btn hudit-btn-secondary hudit-btn-sm" href="/hudit/dashboard">대시보드</a>
+            <button class="hudit-btn hudit-btn-secondary hudit-btn-sm" id="logout-btn" type="button">로그아웃</button>
+        </div>
+    </header>
+
+    <main class="hudit-main project-board-page">
+        <div class="project-board-head">
+            <div>
+                <h1 class="hudit-page-title">휴딧 프로젝트 관리</h1>
+                <p class="hudit-page-subtitle">HUDIT 관련 프로젝트 목록과 진행사항을 조회하고 관리합니다.</p>
+            </div>
+            <button class="hudit-btn hudit-btn-primary" id="create-project-btn" type="button">+ 프로젝트 등록</button>
+        </div>
+
+        <div id="page-alert"></div>
+
+        <div class="project-stat-grid" id="project-stats">
+            <button class="project-stat" type="button" data-status="all">
+                <span class="project-stat-num" id="stat-total">0</span>
+                <span class="project-stat-label">전체</span>
+            </button>
+            <button class="project-stat" type="button" data-status="in_progress">
+                <span class="project-stat-num" id="stat-in-progress">0</span>
+                <span class="project-stat-label">진행중</span>
+            </button>
+            <button class="project-stat" type="button" data-status="planned">
+                <span class="project-stat-num" id="stat-planned">0</span>
+                <span class="project-stat-label">예정</span>
+            </button>
+            <button class="project-stat" type="button" data-status="paused">
+                <span class="project-stat-num" id="stat-paused">0</span>
+                <span class="project-stat-label">보류</span>
+            </button>
+            <button class="project-stat" type="button" data-status="done">
+                <span class="project-stat-num" id="stat-done">0</span>
+                <span class="project-stat-label">완료</span>
+            </button>
+        </div>
+
+        <div class="project-toolbar">
+            <label class="hudit-label" for="filter-category">분류</label>
+            <select class="hudit-input project-filter-select" id="filter-category">
+                <option value="all">전체 분류</option>
+                <option value="MTALK">MTALK</option>
+                <option value="CNT">CNT</option>
+                <option value="Unity">Unity</option>
+                <option value="포털">포털</option>
+                <option value="인프라">인프라</option>
+                <option value="기타">기타</option>
+            </select>
+        </div>
+
+        <div class="project-board-layout">
+            <section class="hudit-card project-list-panel">
+                <div class="hudit-card-body">
+                    <div id="project-list" class="project-list">
+                        <p class="hudit-empty">불러오는 중...</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="hudit-card project-detail-panel" id="project-detail">
+                <div class="hudit-card-body">
+                    <p class="hudit-empty" id="detail-empty">왼쪽에서 프로젝트를 선택하면 진행사항이 표시됩니다.</p>
+                    <div id="detail-body" class="hudit-hidden">
+                        <div class="project-detail-head">
+                            <div>
+                                <div class="project-detail-meta">
+                                    <span class="hudit-badge" id="detail-category"></span>
+                                    <span class="hudit-badge" id="detail-status"></span>
+                                </div>
+                                <h2 id="detail-title"></h2>
+                                <p class="project-detail-summary" id="detail-summary"></p>
+                            </div>
+                            <div class="project-detail-actions">
+                                <button class="hudit-btn hudit-btn-secondary hudit-btn-sm" id="edit-project-btn" type="button">수정</button>
+                                <button class="hudit-btn hudit-btn-danger hudit-btn-sm" id="delete-project-btn" type="button">삭제</button>
+                            </div>
+                        </div>
+                        <div class="project-progress-row">
+                            <div class="project-progress-track">
+                                <div class="project-progress-fill" id="detail-progress-fill"></div>
+                            </div>
+                            <strong id="detail-progress-label">0%</strong>
+                        </div>
+                        <p class="project-detail-owner" id="detail-owner"></p>
+
+                        <form id="update-form" class="project-update-form">
+                            <label class="hudit-label" for="update-content">진행사항 추가</label>
+                            <textarea class="hudit-input project-textarea" id="update-content" rows="3" placeholder="오늘 진행한 내용, 이슈, 다음 할 일을 적어 주세요."></textarea>
+                            <div class="project-update-form-row">
+                                <div>
+                                    <label class="hudit-label" for="update-progress">진행률 (선택)</label>
+                                    <input class="hudit-input" id="update-progress" type="number" min="0" max="100" placeholder="예: 70">
+                                </div>
+                                <button class="hudit-btn hudit-btn-primary" type="submit">등록</button>
+                            </div>
+                        </form>
+
+                        <h3 class="project-updates-title">진행사항 목록</h3>
+                        <div id="update-list" class="project-update-list"></div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+</div>
+
+<div class="hudit-modal-backdrop" id="project-modal">
+    <div class="hudit-modal hudit-modal-wide" role="dialog" aria-modal="true">
+        <div class="hudit-modal-header">
+            <h2 id="project-modal-title">프로젝트 등록</h2>
+            <button class="hudit-btn hudit-btn-secondary hudit-btn-sm" id="project-modal-close" type="button">닫기</button>
+        </div>
+        <div class="hudit-modal-body">
+            <div id="project-modal-alert"></div>
+            <form id="project-form">
+                <input type="hidden" id="edit-seq" value="">
+                <div class="hudit-form-group">
+                    <label class="hudit-label" for="form-title">프로젝트 이름</label>
+                    <input class="hudit-input" id="form-title" required maxlength="200">
+                </div>
+                <div class="hudit-form-grid-2">
+                    <div class="hudit-form-group">
+                        <label class="hudit-label" for="form-category">분류</label>
+                        <select class="hudit-input" id="form-category">
+                            <option value="MTALK">MTALK</option>
+                            <option value="CNT">CNT</option>
+                            <option value="Unity">Unity</option>
+                            <option value="포털">포털</option>
+                            <option value="인프라">인프라</option>
+                            <option value="기타">기타</option>
+                        </select>
+                    </div>
+                    <div class="hudit-form-group">
+                        <label class="hudit-label" for="form-status">상태</label>
+                        <select class="hudit-input" id="form-status">
+                            <option value="planned">예정</option>
+                            <option value="in_progress">진행중</option>
+                            <option value="paused">보류</option>
+                            <option value="done">완료</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="hudit-form-grid-2">
+                    <div class="hudit-form-group">
+                        <label class="hudit-label" for="form-progress">진행률 (%)</label>
+                        <input class="hudit-input" id="form-progress" type="number" min="0" max="100" value="0">
+                    </div>
+                    <div class="hudit-form-group">
+                        <label class="hudit-label" for="form-owner">담당</label>
+                        <input class="hudit-input" id="form-owner" maxlength="100" placeholder="담당자 또는 팀">
+                    </div>
+                </div>
+                <div class="hudit-form-group">
+                    <label class="hudit-label" for="form-summary">요약</label>
+                    <textarea class="hudit-input project-textarea" id="form-summary" rows="3" maxlength="500" placeholder="이 프로젝트에서 다루는 범위를 짧게 적어 주세요."></textarea>
+                </div>
+            </form>
+        </div>
+        <div class="hudit-modal-footer">
+            <button class="hudit-btn hudit-btn-secondary" id="project-modal-cancel" type="button">취소</button>
+            <button class="hudit-btn hudit-btn-primary" id="project-modal-save" type="button">저장</button>
+        </div>
+    </div>
+</div>
+
+<script src="/hudit/js/portal.js"></script>
+<script src="/hudit/js/projects.js"></script>
+</body>
+</html>

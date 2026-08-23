@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HUDIT 관리자 대시보드</title>
-    <link rel="stylesheet" href="/hudit/css/portal.css?v=3">
+    <link rel="stylesheet" href="/hudit/css/portal.css?v=14">
 </head>
 <body>
 <div class="hudit-shell">
@@ -47,6 +47,31 @@
                 <span class="dash-stat-label">인지검사</span>
             </div>
         </div>
+
+        <section class="dash-section">
+            <h2 class="dash-section-title">휴딧 프로젝트 관리</h2>
+            <article class="dash-feature" id="projects-card" tabindex="0" role="link" aria-label="휴딧 프로젝트 관리">
+                <div class="dash-feature-visual" style="background:linear-gradient(145deg,#eef7f0,#e8f3ee)">
+                    <div class="dash-feature-icon">📋</div>
+                    <div class="dash-service-tags">
+                        <span>목록</span>
+                        <span>진행사항</span>
+                        <span>상태</span>
+                    </div>
+                </div>
+                <div class="dash-feature-body">
+                    <div class="dash-feature-head">
+                        <h3>휴딧 프로젝트 관리</h3>
+                        <span class="hudit-badge">게시판</span>
+                    </div>
+                    <p>HUDIT 관련 프로젝트의 목록, 진행률, 진행사항을 한곳에서 조회하고 등록·수정합니다.</p>
+                    <div class="dash-project-preview" id="dash-project-preview">
+                        <p class="hudit-empty" style="margin:0.4rem 0 0">불러오는 중...</p>
+                    </div>
+                    <span class="dash-feature-link">게시판 열기 →</span>
+                </div>
+            </article>
+        </section>
 
         <section class="dash-section">
             <h2 class="dash-section-title">바로가기</h2>
@@ -138,6 +163,36 @@ document.addEventListener("DOMContentLoaded", async () => {
     const name = session.displayName || session.loginId;
     document.getElementById("user-chip").textContent = name;
     document.getElementById("welcome-title").textContent = `${name}님`;
+
+    const projectsCard = document.getElementById("projects-card");
+    const goProjects = () => { window.location.href = "/hudit/projects"; };
+    projectsCard.addEventListener("click", goProjects);
+    projectsCard.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            goProjects();
+        }
+    });
+
+    try {
+        const board = await huditFetch("/projects");
+        const preview = document.getElementById("dash-project-preview");
+        const rows = (board.projects || []).slice(0, 4);
+        if (!rows.length) {
+            preview.innerHTML = `<p class="hudit-empty" style="margin:0.4rem 0 0">등록된 프로젝트가 없습니다.</p>`;
+        } else {
+            preview.innerHTML = rows.map((project) => `
+                <div class="dash-project-row">
+                    <strong>${escapeHtml(project.title)}</strong>
+                    <span class="project-status project-status--${project.status}">${escapeHtml(project.statusLabel)}</span>
+                    <span>${project.progress || 0}%</span>
+                </div>
+            `).join("");
+        }
+    } catch (_) {
+        document.getElementById("dash-project-preview").innerHTML =
+            `<p class="hudit-empty" style="margin:0.4rem 0 0">목록을 불러오지 못했습니다.</p>`;
+    }
 
     const mtalkCard = document.getElementById("mtalk-card");
     const goMtalk = () => { window.location.href = "/hudit/mtalk"; };
