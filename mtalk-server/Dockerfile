@@ -1,4 +1,5 @@
-FROM eclipse-temurin:21-jre-alpine
+# Pin Temurin 21.0.13.1+2 (CVE-2026-114938 / Java4Shell). Do not float on 21-jre-alpine.
+FROM eclipse-temurin:21.0.13.1_2-jre-alpine
 
 WORKDIR /app
 
